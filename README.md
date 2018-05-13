@@ -9,7 +9,12 @@ To obtain the BAM dataset, follow the instructions [here](https://bam-dataset.or
 ``` 
 To process the data into the appropriate format, run:
 ```
-python main.py --mode=gen_data --update=True --remove_broken=True
+python main.py --mode=gen_data --update
+```
+
+If the data is already saved, run:
+```
+python main.py --mode=gen_data --no-update
 ```
 
 ### Run training
