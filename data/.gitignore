@@ -2,3 +2,4 @@ media*/*
 content*/*
 emotion*/*
 bam.sqlite
+*.npy
