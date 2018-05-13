@@ -11,12 +11,9 @@ Created on Fri May 11 18:24:17 2018
 import sys
 import time
 import os
-import tensorflow as tf
 import numpy as np
-import util
-from tensorflow.python import debug as tf_debug
 from argparse import ArgumentParser
-from data_utils import load_data
+from data_utils import load_data, MEDIA_LABELS, EMOTION_LABELS
 
 def build_parser():
     parser = ArgumentParser()
@@ -24,11 +21,19 @@ def build_parser():
                         help="start mode, train, eval, gen_data, test",
                         metavar="MODE", default="train")
     parser.add_argument("--update", dest="update",
-                        help="flag to specify if data should be recreated from the source mages or loaded from saved numpy arrays",
-                        default="false")
-    parser.add_argument("remove_broken", dest="remove_broken",
+                        help="flag to specify that data should be recreated from the source mages or loaded from saved numpy arrays",
+                        action='store_true')
+    parser.add_argument("--no-update", dest="update",
+                        help="flag to specify that data should be recreated from the source mages or loaded from saved numpy arrays",
+                        action='store_false')
+    parser.set_defaults(update=False)
+    parser.add_argument("--remove_broken", dest="remove_broken",
                         help="flag to specify if images that cannot be loaded from disk should be removed (some BAM images are corrupt)",
-                        default="false")
+                        action='store_true')
+    parser.add_argument("--no-remove_broken", dest="remove_broken",
+                        help="flag to specify if images that cannot be loaded from disk should be removed (some BAM images are corrupt)",
+                        action='store_false')
+    parser.set_defaults(remove_broken=False)
     parser.add_argument("--processes", dest="processes",
                         help="number of processes you want to start to train the network",
                         default="1")
@@ -43,7 +48,7 @@ def main():
     options = parser.parse_args()
     
     if options.mode == "gen_data":
-        X, y_media, y_emotion = load_data(update=options.mode, 
+        X, y_media, y_emotion = load_data(update=options.update, 
                                           remove_broken=options.remove_broken)
         total_media = np.sum(y_media, axis=0)
         total_emotion = np.sum(y_emotion, axis=0)
@@ -66,3 +71,6 @@ def main():
     elif options.mode == "test":
         # TO BE IMPLEMENTED
         pass
+
+if __name__ == "__main__":
+    main()
