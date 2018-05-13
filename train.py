@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun May 13 02:31:23 2018
-
-@author: longtran
 """
 
 import tensorflow as tf
