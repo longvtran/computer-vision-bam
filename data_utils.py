@@ -121,7 +121,7 @@ def load_data(update=False, remove_broken=False):
     return X, y_media, y_emotion
 
 if __name__ == "__main__":
-    X, y_media, y_emotion = load_data()
+    X, y_media, y_emotion = load_data(update=True)
     total_media = np.sum(y_media, axis=0)
     total_emotion = np.sum(y_emotion, axis=0)
 

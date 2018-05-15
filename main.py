@@ -14,6 +14,8 @@ import os
 import numpy as np
 from argparse import ArgumentParser
 from data_utils import load_data, MEDIA_LABELS, EMOTION_LABELS
+from preprocessing import load_BAM, Dataset
+from train import train, model_init_fn, optimizer_init_fn
 
 def build_parser():
     parser = ArgumentParser()
@@ -61,9 +63,21 @@ def main():
             print(f"\t{k}: {total_emotion[v]}")
     
     elif options.mode == "train":
-        # TO BE IMPLEMENTED
-        pass
-    
+        X_train, y_media_train, y_emotion_train, X_val, y_media_val, y_emotion_val = load_BAM()
+        print('Train data shape: ', X_train.shape)
+        print('Media train labels shape: ', y_media_train.shape, y_media_train.dtype)
+        print('Emotion train labels shape: ', y_emotion_train.shape, y_emotion_train.dtype)
+        print('Validation data shape: ', X_val.shape)
+        print('Media validation labels shape: ', y_media_val.shape, y_media_val.dtype)
+        print('Emotion validation labels shape: ', y_emotion_val.shape, y_emotion_val.dtype)
+        
+        train_dset = Dataset(X_train, y_media_train, y_emotion_train, batch_size=64, shuffle=True)
+        val_dset = Dataset(X_val, y_media_val, y_emotion_val, batch_size=64, shuffle=False)
+        
+        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, num_epochs=20)
+
+        
+        
     elif options.mode == "eval":
         # TO BE IMPLEMENTED
         pass

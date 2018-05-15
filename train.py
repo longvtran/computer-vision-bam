@@ -7,6 +7,7 @@ Created on Sun May 13 02:31:23 2018
 """
 
 import tensorflow as tf
+from simple_model import ThreeLayerConvNet
 
 def check_accuracy(sess, dset, x, scores, is_training=None):
     """
@@ -22,17 +23,39 @@ def check_accuracy(sess, dset, x, scores, is_training=None):
     Returns: Nothing, but prints the accuracy of the model
     """
     num_correct, num_samples = 0, 0
-    for x_batch, y_batch in dset:
+    for x_batch, y1_batch, y2_batch in dset:
         feed_dict = {x: x_batch, is_training: 0}
         scores_np = sess.run(scores, feed_dict=feed_dict)
-        y_pred = scores_np.argmax(axis=1)
+        y1_pred = scores_np.argmax(axis=1)
         num_samples += x_batch.shape[0]
-        num_correct += (y_pred == y_batch).sum()
+        num_correct += (y1_pred == y1_batch).sum()
     acc = float(num_correct) / num_samples
     print('Got %d / %d correct (%.2f%%)' % (num_correct, num_samples, 100 * acc))
 
+def model_init_fn(inputs, is_training, channel_1=32, channel_2=16, num_classes=7):
+    model = None
+    ############################################################################
+    # TODO: Complete the implementation of model_fn.                           #
+    ############################################################################
+    model = ThreeLayerConvNet(channel_1, channel_2, num_classes)
+    ############################################################################
+    #                           END OF YOUR CODE                               #
+    ############################################################################
+    return model(inputs)
+
+def optimizer_init_fn(learning_rate=3e-3):
+    optimizer = None
+    ############################################################################
+    # TODO: Complete the implementation of model_fn.                           #
+    ############################################################################
+    optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9, use_nesterov=True)
+    ############################################################################
+    #                           END OF YOUR CODE                               #
+    ############################################################################
+    return optimizer
+
 def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0',
-          num_epochs=1, print_every=1000):
+          num_epochs=1, print_every=10):
     """
     Simple training loop for use with models defined using tf.keras. It trains
     a model for one epoch on the CIFAR-10 training set and periodically checks
@@ -53,7 +76,7 @@ def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0
         # Construct the computational graph we will use to train the model. We
         # use the model_init_fn to construct the model, declare placeholders for
         # the data and labels
-        x = tf.placeholder(tf.float32, [None, 32, 32, 3])
+        x = tf.placeholder(tf.float32, [None, 128, 128, 3])
         y = tf.placeholder(tf.int32, [None])
         
         # We need a place holder to explicitly specify if the model is in the training
@@ -92,11 +115,12 @@ def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0
         t = 0
         for epoch in range(num_epochs):
             print('Starting epoch %d' % epoch)
-            for x_np, y_np in train_dset:
-                feed_dict = {x: x_np, y: y_np, is_training:1}
+            for x_np, y1_np, y2_np in train_dset:
+                feed_dict = {x: x_np, y: y1_np, is_training:1}
                 loss_np, _ = sess.run([loss, train_op], feed_dict=feed_dict)
                 if t % print_every == 0:
                     print('Iteration %d, loss = %.4f' % (t, loss_np))
+                    check_accuracy(sess, train_dset, x, scores, is_training=is_training)
                     check_accuracy(sess, val_dset, x, scores, is_training=is_training)
                     print()
                 t += 1
