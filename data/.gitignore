@@ -1,5 +1,9 @@
-media*/*
+train*/*
 content*/*
 emotion*/*
+train/*
+dev/*
+test/*
 bam.sqlite
 *.npy
+*.npz

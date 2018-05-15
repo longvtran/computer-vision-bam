@@ -1,6 +1,11 @@
 import os
+import random
+import math
 import numpy as np
 from scipy.misc import imread, imresize
+
+# Random seed for splitting data consistently
+SEED = 231
 
 # H x W that the images should be reshaped to
 IMG_SIZE = (128, 128)
@@ -10,9 +15,9 @@ DATA_DIR = "data/"
 # SQLite file needs to go at "data/bam.sqlite"
 BAM = "bam.sqlite"
 # Names for the saved numpy arrays that include the reshaped and formated data
-INPUT_FILE = "input.npy"
-MEDIA_LABEL_FILE = "media_label.npy"
-EMOTION_LABEL_FILE = "emotion_label.npy"
+INPUT_FILE = "input.npz"
+MEDIA_LABEL_FILE = "media_label.npz"
+EMOTION_LABEL_FILE = "emotion_label.npz"
 
 # List of media label names
 MEDIA_LABELS = [
@@ -42,7 +47,49 @@ def split_data(dev_test_ratio=.1):
         dev_test_ratio - proportion of the full dataset that should be used
                          for the dev set and for the test set
     """
-    pass
+    # Prevent splitting when data is already split by checking if
+    # DATA_DIR/train exists.
+    print("Checking if data needs to be split")
+    if os.access(os.path.join(DATA_DIR, "train"), os.F_OK):
+        return
+
+    # Move all files to train/dev/test randomly using a set seed
+    print("Splitting data into train/dev/test sets")
+    seed = SEED
+    random.seed(seed)
+
+    for media_dir in os.scandir(DATA_DIR):
+        if not media_dir.is_dir():
+            continue
+        for path, _, filenames in os.walk(media_dir):
+            if len(path.split('/')) <= 2:
+                continue
+
+            _, media_type, emotion_type = path.split("/")
+
+            # If no images in these categories then remove the folders
+            if len(filenames) == 0:
+                os.removedirs(os.path.join(DATA_DIR, media_type, emotion_type))
+                continue
+
+            # Shuffle images and then save into train/dev/test guaranteeing
+            # that at least one image is in the test set from each category
+            random.shuffle(filenames)
+            set_size = int(math.ceil(len(filenames) * dev_test_ratio))
+
+            train_path = os.path.join(DATA_DIR, "train", media_type, emotion_type)
+            for fn in filenames[:-2*set_size]:
+                os.renames(os.path.join(path, fn), os.path.join(train_path, fn))
+
+            dev_path = os.path.join(DATA_DIR, "dev", media_type, emotion_type)
+            for fn in filenames[-2*set_size:-set_size]:
+                os.renames(os.path.join(path, fn), os.path.join(dev_path, fn))
+
+            test_path = os.path.join(DATA_DIR, "test", media_type, emotion_type)
+            for fn in filenames[-set_size:]:
+                os.renames(os.path.join(path, fn), os.path.join(test_path, fn))
+    print("Data successfully split\n")
+
 
 def load_data(update=False, remove_broken=False):
     """
@@ -69,16 +116,21 @@ def load_data(update=False, remove_broken=False):
             y_media = np.load(os.path.join(DATA_DIR, MEDIA_LABEL_FILE))
             y_emotion = np.load(os.path.join(DATA_DIR, EMOTION_LABEL_FILE))
             print("Completed loading all data")
-            print(f"Input shape: {X.shape}")
-            print(f"Media labels shape: {y_media.shape}")
-            print(f"Emotion labels shape: {y_emotion.shape}")
+            print(f"Input shape: {X['train'].shape}")
+            print(f"Media labels shape: {y_media['train'].shape}")
+            print(f"Emotion labels shape: {y_emotion['train'].shape}")
             return X, y_media, y_emotion
         except:
             print("Could not reload saved numpy arrays")
 
-    X = []
-    y_media = []
-    y_emotion = []
+    # Create dictionaries for the input and labels depending on the set_type
+    X = {}
+    y_media = {}
+    y_emotion = {}
+    for set_type in ["train", "dev", "test"]:
+        X[set_type] = []
+        y_media[set_type] = []
+        y_emotion[set_type] = []
 
     # Scan for images in the data directory
     print(f"Scanning '{DATA_DIR}'")
@@ -86,9 +138,9 @@ def load_data(update=False, remove_broken=False):
         if not media_dir.is_dir():
             continue
         for path, _, filenames in os.walk(media_dir):
-            if len(path.split('/')) <= 2 or len(filenames) == 0:
+            if len(path.split('/')) <= 3 or len(filenames) == 0:
                 continue
-            _, media_type, emotion_type = path.split("/")
+            _, set_type, media_type, emotion_type = path.split("/")
 
             # Create the training labels as binary ndarrays
             media_label = ((np.arange(num_media) == media_dict[media_type])
@@ -112,42 +164,52 @@ def load_data(update=False, remove_broken=False):
                     if (img.shape[2] != 3):
                         continue
                     #print(img.shape, media_label.shape, emotion_label.shape)
-                    X.append(np.expand_dims(img, axis=0))
-                    y_media.append(np.expand_dims(media_label, axis=0))
-                    y_emotion.append(np.expand_dims(emotion_label, axis=0))
+                    X[set_type].append(np.expand_dims(img, axis=0))
+                    y_media[set_type].append(np.expand_dims(media_label, axis=0))
+                    y_emotion[set_type].append(np.expand_dims(emotion_label, axis=0))
 
                 except (OSError, IndexError, KeyError):
                     print(f"Could not open: {img_path}")
                     if remove_broken: os.remove(img_path)
 
-    # Concatenate all the data
-    X = np.concatenate(X, axis=0)
-    y_media = np.concatenate(y_media, axis=0)
-    y_emotion = np.concatenate(y_emotion, axis=0)
+    # Concatenate all the data and randomly sort using set seed
+    seed = SEED
+    np.random.seed(seed)
+    for set_type in ["train", "dev", "test"]:
+        X[set_type] = np.concatenate(X[set_type], axis=0)
+        y_media[set_type] = np.concatenate(y_media[set_type], axis=0)
+        y_emotion[set_type] = np.concatenate(y_emotion[set_type], axis=0)
 
-    # Randomly shuffle the data and labels
-    order = np.random.permutation(X.shape[0])
-    X = X[order]
-    y_media = y_media[order]
-    y_emotion = y_emotion[order]
+        order = np.random.permutation(X[set_type].shape[0])
+        X[set_type] = X[set_type][order]
+        y_media[set_type] = y_media[set_type][order]
+        y_emotion[set_type] = y_emotion[set_type][order]
 
+    # Save each dictionary as an npz file
     print("Completed loading all data")
-    print(f"Input shape: {X.shape}")
-    print(f"Media labels shape: {y_media.shape}")
-    print(f"Emotion labels shape: {y_emotion.shape}")
-    np.save(os.path.join(DATA_DIR, INPUT_FILE), X)
-    np.save(os.path.join(DATA_DIR, MEDIA_LABEL_FILE), y_media)
-    np.save(os.path.join(DATA_DIR, EMOTION_LABEL_FILE), y_emotion)
+    print(f"Input train shape: {X['train'].shape}")
+    print(f"Media labels train shape: {y_media['train'].shape}")
+    print(f"Emotion labels train shape: {y_emotion['train'].shape}")
+    np.savez(os.path.join(DATA_DIR, INPUT_FILE), **X)
+    np.savez(os.path.join(DATA_DIR, MEDIA_LABEL_FILE), **y_media)
+    np.savez(os.path.join(DATA_DIR, EMOTION_LABEL_FILE), **y_emotion)
+
     return X, y_media, y_emotion
 
 if __name__ == "__main__":
-    X, y_media, y_emotion = load_data(update=True)
-    total_media = np.sum(y_media, axis=0)
-    total_emotion = np.sum(y_emotion, axis=0)
+    # Split the data into train/dev/test sets
+    split_data()
 
-    print("Total images for each media category:")
-    for v, k in enumerate(MEDIA_LABELS):
-        print(f"\t{k}: {total_media[v]}")
-    print("Total images for each emotion category:")
-    for v, k in enumerate(EMOTION_LABELS):
-        print(f"\t{k}: {total_emotion[v]}")
+    # Load the data and reshape for training and evaluation
+    X, y_media, y_emotion = load_data(update=True)
+
+    for set_type in ["train", "dev", "test"]:
+        total_media = np.sum(y_media[set_type], axis=0)
+        total_emotion = np.sum(y_emotion[set_type], axis=0)
+
+        print(f"Total images for each media category in {set_type} set:")
+        for v, k in enumerate(MEDIA_LABELS):
+            print(f"\t{k}: {total_media[v]}")
+        print(f"Total images for each emotion category in {set_type} set:")
+        for v, k in enumerate(EMOTION_LABELS):
+            print(f"\t{k}: {total_emotion[v]}")
