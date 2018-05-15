@@ -112,7 +112,7 @@ def load_data(update=False, remove_broken=False):
     y_media = np.concatenate(y_media, axis=0)
     y_emotion = np.concatenate(y_emotion, axis=0)
 
-    # TODO: shuffle the data
+    # Randomly shuffle the data and labels
     order = np.random.permutation(X.shape[0])
     X = X[order]
     y_media = y_media[order]
