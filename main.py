@@ -13,8 +13,8 @@ import time
 import os
 import numpy as np
 from argparse import ArgumentParser
-from data_utils import load_data, MEDIA_LABELS, EMOTION_LABELS
-from preprocessing import load_BAM, Dataset
+from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS
+from preprocessing import preprocess, Dataset
 from train import train, model_init_fn, optimizer_init_fn
 
 def build_parser():
@@ -50,33 +50,30 @@ def main():
     options = parser.parse_args()
     
     if options.mode == "gen_data":
+        # Split the data into train/dev/test sets
+        split_data()
+
+        # Load the data and reshape for training and evaluation
         X, y_media, y_emotion = load_data(update=options.update, 
                                           remove_broken=options.remove_broken)
-        total_media = np.sum(y_media, axis=0)
-        total_emotion = np.sum(y_emotion, axis=0)
+    
+        for set_type in ["train", "dev", "test"]:
+            total_media = np.sum(y_media[set_type], axis=0)
+            total_emotion = np.sum(y_emotion[set_type], axis=0)
+    
+            print(f"Total images for each media category in {set_type} set:")
+            for v, k in enumerate(MEDIA_LABELS):
+                print(f"\t{k}: {total_media[v]}")
+            print(f"Total images for each emotion category in {set_type} set:")
+            for v, k in enumerate(EMOTION_LABELS):
+                print(f"\t{k}: {total_emotion[v]}")
 
-        print("Total images for each media category:")
-        for v, k in enumerate(MEDIA_LABELS):
-            print(f"\t{k}: {total_media[v]}")
-        print("Total images for each emotion category:")
-        for v, k in enumerate(EMOTION_LABELS):
-            print(f"\t{k}: {total_emotion[v]}")
     
     elif options.mode == "train":
-        X_train, y_media_train, y_emotion_train, X_val, y_media_val, y_emotion_val = load_BAM()
-        print('Train data shape: ', X_train.shape)
-        print('Media train labels shape: ', y_media_train.shape, y_media_train.dtype)
-        print('Emotion train labels shape: ', y_emotion_train.shape, y_emotion_train.dtype)
-        print('Validation data shape: ', X_val.shape)
-        print('Media validation labels shape: ', y_media_val.shape, y_media_val.dtype)
-        print('Emotion validation labels shape: ', y_emotion_val.shape, y_emotion_val.dtype)
-        
-        train_dset = Dataset(X_train, y_media_train, y_emotion_train, batch_size=64, shuffle=True)
-        val_dset = Dataset(X_val, y_media_val, y_emotion_val, batch_size=64, shuffle=False)
-        
+        train_data, val_data, test_data = preprocess(DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS)
+        train_dset = Dataset(train_data[0], train_data[1], train_data[2], batch_size=64, shuffle=True)
+        val_dset = Dataset(val_data[0], val_data[1], val_data[2], batch_size=64, shuffle=False)
         train(model_init_fn, optimizer_init_fn, train_dset, val_dset, num_epochs=20)
-
-        
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED

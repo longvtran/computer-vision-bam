@@ -7,7 +7,7 @@ Created on Sun May 13 02:31:23 2018
 """
 
 import tensorflow as tf
-from simple_model import ThreeLayerConvNet
+from simple_model import ConvNet
 
 def check_accuracy(sess, dset, x, scores, is_training=None):
     """
@@ -22,22 +22,31 @@ def check_accuracy(sess, dset, x, scores, is_training=None):
       
     Returns: Nothing, but prints the accuracy of the model
     """
-    num_correct, num_samples = 0, 0
-    for x_batch, y1_batch, y2_batch in dset:
+    num_media_correct = 0
+    num_emotion_correct = 0
+    num_samples = 0
+    for x_batch, y_media_batch, y_emotion_batch in dset:
         feed_dict = {x: x_batch, is_training: 0}
+        #scores_media_np, scores_emotion_np = sess.run([scores_media, scores_emotion], feed_dict=feed_dict)
         scores_np = sess.run(scores, feed_dict=feed_dict)
-        y1_pred = scores_np.argmax(axis=1)
+        scores_media_np = scores_np[:,:7]
+        scores_emotion_np = scores_np[:,7:]
+        y_media_pred = scores_media_np.argmax(axis=1)
+        y_emotion_pred = scores_emotion_np.argmax(axis=1)
         num_samples += x_batch.shape[0]
-        num_correct += (y1_pred == y1_batch).sum()
-    acc = float(num_correct) / num_samples
-    print('Got %d / %d correct (%.2f%%)' % (num_correct, num_samples, 100 * acc))
+        num_media_correct += (y_media_pred == y_media_batch).sum()
+        num_emotion_correct += (y_emotion_pred == y_emotion_batch).sum()
+    media_acc = float(num_media_correct) / num_samples
+    emotion_acc = float(num_emotion_correct) / num_samples
+    print('Got %d / %d correct (%.2f%%) for media labels' % (num_media_correct, num_samples, 100 * media_acc))
+    print('Got %d / %d correct (%.2f%%) for emotion labels' % (num_emotion_correct, num_samples, 100 * emotion_acc))
 
-def model_init_fn(inputs, is_training, channel_1=32, channel_2=16, num_classes=7):
+def model_init_fn(inputs, is_training):
     model = None
     ############################################################################
     # TODO: Complete the implementation of model_fn.                           #
     ############################################################################
-    model = ThreeLayerConvNet(channel_1, channel_2, num_classes)
+    model = ConvNet()
     ############################################################################
     #                           END OF YOUR CODE                               #
     ############################################################################
@@ -55,7 +64,7 @@ def optimizer_init_fn(learning_rate=3e-3):
     return optimizer
 
 def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0',
-          num_epochs=1, print_every=10):
+          num_epochs=1, print_every=30):
     """
     Simple training loop for use with models defined using tf.keras. It trains
     a model for one epoch on the CIFAR-10 training set and periodically checks
@@ -77,21 +86,26 @@ def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0
         # use the model_init_fn to construct the model, declare placeholders for
         # the data and labels
         x = tf.placeholder(tf.float32, [None, 128, 128, 3])
-        y = tf.placeholder(tf.int32, [None])
+        y_media = tf.placeholder(tf.int32, [None])
+        y_emotion = tf.placeholder(tf.int32, [None])
         
         # We need a place holder to explicitly specify if the model is in the training
         # phase or not. This is because a number of layers behaves differently in
         # training and in testing, e.g., dropout and batch normalization.
         # We pass this variable to the computation graph through feed_dict as shown below.
         is_training = tf.placeholder(tf.bool, name='is_training')
-        
+                
         # Use the model function to build the forward pass.
+        #scores_media, scores_emotion = model_init_fn(x, is_training)
         scores = model_init_fn(x, is_training)
-
-        # Compute the loss like we did in Part II
-        loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=scores)
-        loss = tf.reduce_mean(loss)
-
+        
+        # Compute the losses
+        scores_media = scores[:,:7]
+        scores_emotion = scores[:,7:]
+        loss_media = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_media, logits=scores_media)
+        loss_emotion = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_emotion, logits=scores_emotion)
+        loss = tf.reduce_mean(loss_media + loss_emotion)
+        
         # Use the optimizer_fn to construct an Optimizer, then use the optimizer
         # to set up the training step. Asking TensorFlow to evaluate the
         # train_op returned by optimizer.minimize(loss) will cause us to make a
@@ -115,12 +129,17 @@ def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0
         t = 0
         for epoch in range(num_epochs):
             print('Starting epoch %d' % epoch)
-            for x_np, y1_np, y2_np in train_dset:
-                feed_dict = {x: x_np, y: y1_np, is_training:1}
+            for x_np, y_media_np, y_emotion_np in train_dset:
+                feed_dict = {x: x_np, y_media: y_media_np, y_emotion: y_emotion_np, is_training:1}
+                #feed_dict = {x: x_np, y_media: y_media_np, is_training:1}
                 loss_np, _ = sess.run([loss, train_op], feed_dict=feed_dict)
                 if t % print_every == 0:
                     print('Iteration %d, loss = %.4f' % (t, loss_np))
-                    check_accuracy(sess, train_dset, x, scores, is_training=is_training)
-                    check_accuracy(sess, val_dset, x, scores, is_training=is_training)
                     print()
                 t += 1
+            
+            print("Validation Accuracy:")
+            check_accuracy(sess, val_dset, x, scores, is_training=is_training)
+            print("Training Accuracy:")
+            check_accuracy(sess, train_dset, x, scores, is_training=is_training)
+            print()
