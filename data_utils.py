@@ -111,6 +111,13 @@ def load_data(update=False, remove_broken=False):
     X = np.concatenate(X, axis=0)
     y_media = np.concatenate(y_media, axis=0)
     y_emotion = np.concatenate(y_emotion, axis=0)
+
+    # TODO: shuffle the data
+    order = np.random.permutation(X.shape[0])
+    X = X[order]
+    y_media = y_media[order]
+    y_emotion = y_emotion[order]
+
     print("Completed loading all data")
     print(f"Input shape: {X.shape}")
     print(f"Media labels shape: {y_media.shape}")
