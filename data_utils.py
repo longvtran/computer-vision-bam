@@ -201,7 +201,7 @@ if __name__ == "__main__":
     split_data()
 
     # Load the data and reshape for training and evaluation
-    X, y_media, y_emotion = load_data(update=True)
+    X, y_media, y_emotion = load_data(update=False)
 
     for set_type in ["train", "dev", "test"]:
         total_media = np.sum(y_media[set_type], axis=0)
