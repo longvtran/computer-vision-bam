@@ -18,7 +18,7 @@ python main.py --mode=gen_data --no-update
 ```
 
 ### Run training
-To train your model, run (TO BE IMPLEMENTED):
+To train your model, run:
 
 ```
 python main.py --mode=train
