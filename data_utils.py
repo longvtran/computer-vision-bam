@@ -31,6 +31,19 @@ EMOTION_LABELS = [
         "emotion_scary"]
 
 
+def split_data(dev_test_ratio=.1):
+    """
+    Splits the directory struction in the DATA_DIR to have three folders
+    (train, dev, test). Each folder contains the same subdirectories as are
+    created using get_data.sh. Data is split so that the dev and test datasets
+    are DEV_TEST_RATIO of the original dataset.
+
+    Input:
+        dev_test_ratio - proportion of the full dataset that should be used
+                         for the dev set and for the test set
+    """
+    pass
+
 def load_data(update=False, remove_broken=False):
     """
     Load BAM dataset images from disk and return as numpy arrays
