@@ -100,8 +100,13 @@ def main():
         train_dset = Dataset(train_data[0], train_data[1], train_data[2], batch_size=64, shuffle=True)
         val_dset = Dataset(val_data[0], val_data[1], val_data[2], batch_size=64, shuffle=False)
         
+        # Specify the device:
+        if options.device == "cpu":
+            device = "/cpu:0"
+        elif options.device == "gpu":
+            device = "/device:GPU:0"
         # Train the model
-        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, num_epochs=1)
+        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device=device, num_epochs=1)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED
