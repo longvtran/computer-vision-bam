@@ -7,7 +7,7 @@ Created on Mon May 14 09:00:50 2018
 """
 
 import numpy as np
-import tensorflow as tf
+import logging
 from data_utils import DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
 import os
 
@@ -37,15 +37,15 @@ def preprocess(data_dir, input_file, media_label_file, emotion_label_file):
     X_test = (X_test - mean_pixel) / std_pixel
     
     # Print the shapes for potential debugging
-    print('Train data shape: ', X_train.shape)
-    print('Media train labels shape: ', y_media_train.shape, y_media_train.dtype)
-    print('Emotion train labels shape: ', y_emotion_train.shape, y_emotion_train.dtype)
-    print('Validation data shape: ', X_val.shape)
-    print('Media validation labels shape: ', y_media_val.shape, y_media_val.dtype)
-    print('Emotion validation labels shape: ', y_emotion_val.shape, y_emotion_val.dtype)
-    print('Test data shape: ', X_test.shape)
-    print('Media test labels shape: ', y_media_test.shape, y_media_test.dtype)
-    print('Emotion test labels shape: ', y_emotion_test.shape, y_emotion_test.dtype)
+    logging.info('Train data shape: %s', X_train.shape)
+    logging.info('Media train labels shape: %s, %s', y_media_train.shape, y_media_train.dtype)
+    logging.info('Emotion train labels shape: %s, %s', y_emotion_train.shape, y_emotion_train.dtype)
+    logging.info('Validation data shape: %s', X_val.shape)
+    logging.info('Media validation labels shape: %s, %s', y_media_val.shape, y_media_val.dtype)
+    logging.info('Emotion validation labels shape: %s, %s', y_emotion_val.shape, y_emotion_val.dtype)
+    logging.info('Test data shape: %s', X_test.shape)
+    logging.info('Media test labels shape: %s, %s', y_media_test.shape, y_media_test.dtype)
+    logging.info('Emotion test labels shape: %s, %s', y_emotion_test.shape, y_emotion_test.dtype)
     
     # Return tuples of train, dev, test
     train_data = (X_train, y_media_train, y_emotion_train)
@@ -57,7 +57,7 @@ def preprocess(data_dir, input_file, media_label_file, emotion_label_file):
 class Dataset(object):
     def __init__(self, X, y_media, y_emotion, batch_size, shuffle=False):
         """
-        Construct a Dataset object to iterate over data X and labels y
+        Construct a Dataset object to iterate over data X and labels y_media, y_emotion
         
         Inputs:
         - X: Numpy array of data, of any shape

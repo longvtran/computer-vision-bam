@@ -7,7 +7,8 @@ Created on Sun May 13 02:31:23 2018
 """
 
 import tensorflow as tf
-from simple_model import ConvNet
+import logging
+from model import ConvNet
 
 def check_accuracy(sess, dset, x, scores, is_training=None):
     """
@@ -17,8 +18,8 @@ def check_accuracy(sess, dset, x, scores, is_training=None):
     - sess: A TensorFlow Session that will be used to run the graph
     - dset: A Dataset object on which to check accuracy
     - x: A TensorFlow placeholder Tensor where input images should be fed
-    - scores: A TensorFlow Tensor representing the scores output from the
-      model; this is the Tensor we will ask TensorFlow to evaluate.
+    - scores: A TensorFlow Tensor representing the scores output (including the scores 
+    of media output and the scores of emotion output) from the model.
       
     Returns: Nothing, but prints the accuracy of the model
     """
@@ -27,40 +28,32 @@ def check_accuracy(sess, dset, x, scores, is_training=None):
     num_samples = 0
     for x_batch, y_media_batch, y_emotion_batch in dset:
         feed_dict = {x: x_batch, is_training: 0}
-        #scores_media_np, scores_emotion_np = sess.run([scores_media, scores_emotion], feed_dict=feed_dict)
         scores_np = sess.run(scores, feed_dict=feed_dict)
+        # Get the scores of media and the scores of emotion
         scores_media_np = scores_np[:,:7]
         scores_emotion_np = scores_np[:,7:]
+        # Calculate the prediction for media and emotion labels
         y_media_pred = scores_media_np.argmax(axis=1)
         y_emotion_pred = scores_emotion_np.argmax(axis=1)
+        
+        # Calculate the number of correct predictions
         num_samples += x_batch.shape[0]
         num_media_correct += (y_media_pred == y_media_batch).sum()
         num_emotion_correct += (y_emotion_pred == y_emotion_batch).sum()
+    
+    # Calculate the overall media and emotion accuracy
     media_acc = float(num_media_correct) / num_samples
     emotion_acc = float(num_emotion_correct) / num_samples
-    print('Got %d / %d correct (%.2f%%) for media labels' % (num_media_correct, num_samples, 100 * media_acc))
-    print('Got %d / %d correct (%.2f%%) for emotion labels' % (num_emotion_correct, num_samples, 100 * emotion_acc))
+    logging.info('Got %d / %d correct (%.2f%%) for media labels' % (num_media_correct, num_samples, 100 * media_acc))
+    logging.info('Got %d / %d correct (%.2f%%) for emotion labels' % (num_emotion_correct, num_samples, 100 * emotion_acc))
 
 def model_init_fn(inputs, is_training):
-    model = None
-    ############################################################################
-    # TODO: Complete the implementation of model_fn.                           #
-    ############################################################################
     model = ConvNet()
-    ############################################################################
-    #                           END OF YOUR CODE                               #
-    ############################################################################
     return model(inputs)
 
 def optimizer_init_fn(learning_rate=3e-3):
     optimizer = None
-    ############################################################################
-    # TODO: Complete the implementation of model_fn.                           #
-    ############################################################################
     optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9, use_nesterov=True)
-    ############################################################################
-    #                           END OF YOUR CODE                               #
-    ############################################################################
     return optimizer
 
 def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0',
@@ -128,18 +121,16 @@ def train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device='/cpu:0
         sess.run(tf.global_variables_initializer())
         t = 0
         for epoch in range(num_epochs):
-            print('Starting epoch %d' % epoch)
+            logging.info('Starting epoch %d' % epoch)
             for x_np, y_media_np, y_emotion_np in train_dset:
                 feed_dict = {x: x_np, y_media: y_media_np, y_emotion: y_emotion_np, is_training:1}
                 #feed_dict = {x: x_np, y_media: y_media_np, is_training:1}
                 loss_np, _ = sess.run([loss, train_op], feed_dict=feed_dict)
                 if t % print_every == 0:
-                    print('Iteration %d, loss = %.4f' % (t, loss_np))
-                    print()
+                    logging.info('Iteration %d, loss = %.4f' % (t, loss_np))
                 t += 1
             
-            print("Validation Accuracy:")
+            logging.info("Validation Accuracy:")
             check_accuracy(sess, val_dset, x, scores, is_training=is_training)
-            print("Training Accuracy:")
+            logging.info("Training Accuracy:")
             check_accuracy(sess, train_dset, x, scores, is_training=is_training)
-            print()

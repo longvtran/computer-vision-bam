@@ -16,6 +16,7 @@ from argparse import ArgumentParser
 from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS
 from preprocessing import preprocess, Dataset
 from train import train, model_init_fn, optimizer_init_fn
+import logging
 
 def build_parser():
     parser = ArgumentParser()
@@ -41,11 +42,12 @@ def build_parser():
                         default="1")
     parser.add_argument("--device", dest="device", default="cpu",
                         help="device to be used to train")
-    parser.add_argument("--folder", dest="folder", type=int,
-                        help="folder(int) to load the config, neglect this option if loading from ./computer-vision-bam/net_config.json")
+    parser.add_argument("--log_folder", dest="log_folder",
+                        help="log folder to save log files from training")
     return parser
 
 def main():
+    # Parse command-line arguments
     parser = build_parser()
     options = parser.parse_args()
     
@@ -70,10 +72,36 @@ def main():
 
     
     elif options.mode == "train":
+        # Create directory to save the results
+        results_dir = "train_results"
+        if not os.path.exists("./" + results_dir):
+            os.makedirs("./" + results_dir)
+        # Check if the given log folder already exists
+        results_subdirs = os.listdir("./" + results_dir)
+        if not options.log_folder:
+            raise Exception('Please specify log_folder argument to store results.')
+        elif options.log_folder in results_subdirs:
+            raise Exception('The given log folder already exists.')
+        else:
+            # Create a folder for each training run
+            os.makedirs(os.path.join(results_dir, options.log_folder))
+            # Save a log file
+            log_file = os.path.join(results_dir, options.log_folder, "programlog.log")
+            logging.basicConfig(filename=log_file, level=logging.INFO)
+            # Also print the log to console
+            stderrLogger=logging.StreamHandler()
+            stderrLogger.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
+            logging.getLogger().addHandler(stderrLogger)
+        
+        # Preprocess the data and organize into three tuples (train, val/dev, test)
+        # Each tuple consists of input arrays, media labels, and emotion labels
         train_data, val_data, test_data = preprocess(DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS)
+        # Use Dataset class to properly batch the data
         train_dset = Dataset(train_data[0], train_data[1], train_data[2], batch_size=64, shuffle=True)
         val_dset = Dataset(val_data[0], val_data[1], val_data[2], batch_size=64, shuffle=False)
-        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, num_epochs=20)
+        
+        # Train the model
+        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, num_epochs=1)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED

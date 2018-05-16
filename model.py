@@ -20,33 +20,33 @@ class ConvNet(tf.keras.Model):
         initializer = tf.variance_scaling_initializer(scale=2.0)
         
         # Media side
-#        self.conv1_media = tf.layers.Conv2D(filters=64, kernel_size=(5,5), padding='same', 
-#                                     activation=tf.nn.relu, kernel_initializer=
-#                                     initializer)
-#        self.maxpool1_media = tf.layers.MaxPooling2D(2, 2)
-#        self.conv2_media = tf.layers.Conv2D(filters=32, kernel_size=(3,3), padding='same', 
-#                                     activation=tf.nn.relu, kernel_initializer=
-#                                     initializer)
-#        self.maxpool2_media = tf.layers.MaxPooling2D(2, 2)
-#        self.conv3_media = tf.layers.Conv2D(filters=16, kernel_size=(3,3), padding='same',
-#                                     activation=tf.nn.relu, kernel_initializer=
-#                                     initializer)
+        self.conv1_media = tf.layers.Conv2D(filters=64, kernel_size=(5,5), padding='same', 
+                                     activation=tf.nn.relu, kernel_initializer=
+                                     initializer)
+        self.maxpool1_media = tf.layers.MaxPooling2D(2, 2)
+        self.conv2_media = tf.layers.Conv2D(filters=32, kernel_size=(3,3), padding='same', 
+                                     activation=tf.nn.relu, kernel_initializer=
+                                     initializer)
+        self.maxpool2_media = tf.layers.MaxPooling2D(2, 2)
+        self.conv3_media = tf.layers.Conv2D(filters=16, kernel_size=(3,3), padding='same',
+                                     activation=tf.nn.relu, kernel_initializer=
+                                     initializer)
         self.flatten_media = tf.layers.Flatten()
         self.fc_media = tf.layers.Dense(num_classes_media,
                                    kernel_initializer=initializer)
         
         # Emotion side
-#        self.conv1_emotion = tf.layers.Conv2D(filters=64, kernel_size=(5,5), padding='same', 
-#                                     activation=tf.nn.relu, kernel_initializer=
-#                                     initializer)
-#        self.maxpool1_emotion = tf.layers.MaxPooling2D(2, 2)
-#        self.conv2_emotion = tf.layers.Conv2D(filters=32, kernel_size=(3,3), padding='same', 
-#                                     activation=tf.nn.relu, kernel_initializer=
-#                                     initializer)
-#        self.maxpool2_emotion = tf.layers.MaxPooling2D(2, 2)
-#        self.conv3_emotion = tf.layers.Conv2D(filters=16, kernel_size=(3,3), padding='same',
-#                                     activation=tf.nn.relu, kernel_initializer=
-#                                     initializer)
+        self.conv1_emotion = tf.layers.Conv2D(filters=64, kernel_size=(5,5), padding='same', 
+                                     activation=tf.nn.relu, kernel_initializer=
+                                     initializer)
+        self.maxpool1_emotion = tf.layers.MaxPooling2D(2, 2)
+        self.conv2_emotion = tf.layers.Conv2D(filters=32, kernel_size=(3,3), padding='same', 
+                                     activation=tf.nn.relu, kernel_initializer=
+                                     initializer)
+        self.maxpool2_emotion = tf.layers.MaxPooling2D(2, 2)
+        self.conv3_emotion = tf.layers.Conv2D(filters=16, kernel_size=(3,3), padding='same',
+                                     activation=tf.nn.relu, kernel_initializer=
+                                     initializer)
         self.flatten_emotion = tf.layers.Flatten()
         self.fc_emotion = tf.layers.Dense(num_classes_emotion,
                                    kernel_initializer=initializer)
@@ -62,21 +62,21 @@ class ConvNet(tf.keras.Model):
         # should use the layer objects defined in the __init__ method.         #
         ########################################################################
         # Media side
-#        x_media = self.conv1_media(x)
-#        x_media = self.maxpool1_media(x_media)
-#        x_media = self.conv2_media(x_media)
-#        x_media = self.maxpool2_media(x_media)
-#        x_media = self.conv3_media(x_media)
-        x_media = self.flatten_media(x)
+        x_media = self.conv1_media(x)
+        x_media = self.maxpool1_media(x_media)
+        x_media = self.conv2_media(x_media)
+        x_media = self.maxpool2_media(x_media)
+        x_media = self.conv3_media(x_media)
+        x_media = self.flatten_media(x_media)
         scores_media = self.fc_media(x_media)
         
         # Emotion side
-#        x_emotion = self.conv1_emotion(x)
-#        x_emotion = self.maxpool1_emotion(x_emotion)
-#        x_emotion = self.conv2_emotion(x_emotion)
-#        x_emotion = self.maxpool2_emotion(x_emotion)
-#        x_emotion = self.conv3_emotion(x_emotion)
-        x_emotion = self.flatten_emotion(x)
+        x_emotion = self.conv1_emotion(x)
+        x_emotion = self.maxpool1_emotion(x_emotion)
+        x_emotion = self.conv2_emotion(x_emotion)
+        x_emotion = self.maxpool2_emotion(x_emotion)
+        x_emotion = self.conv3_emotion(x_emotion)
+        x_emotion = self.flatten_emotion(x_emotion)
         scores_emotion = self.fc_emotion(x_emotion)
         
         scores = tf.concat([scores_media, scores_emotion], axis=1)
