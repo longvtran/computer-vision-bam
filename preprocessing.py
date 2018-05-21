@@ -35,12 +35,6 @@ def preprocess(data_dir, input_file, media_label_file, emotion_label_file):
     X_train = input_data['train']
     X_val = input_data['dev']
     X_test = input_data['test']
-#    y_media_train = np.argmax(media_data['train'].astype(np.int32), axis=1)
-#    y_media_val = np.argmax(media_data['dev'].astype(np.int32), axis=1)
-#    y_media_test = np.argmax(media_data['test'].astype(np.int32), axis=1)
-#    y_emotion_train = np.argmax(emotion_data['train'].astype(np.int32), axis=1)
-#    y_emotion_val = np.argmax(emotion_data['dev'].astype(np.int32), axis=1)
-#    y_emotion_test = np.argmax(emotion_data['test'].astype(np.int32), axis=1)
     
     y_media_train = media_data['train']
     y_media_val = media_data['dev']
