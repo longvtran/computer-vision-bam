@@ -44,6 +44,7 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
     x_media = tf.keras.layers.Flatten()(x_media)
     output_media = tf.keras.layers.Dense(num_classes_media,
                                    kernel_initializer=initializer,
+                                   activation='softmax',
                                    name='output_media')(x_media)
     
     # Emotion side
@@ -55,8 +56,9 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
                                  activation=tf.nn.relu, kernel_initializer=
                                  initializer)(x_emotion)
     x_emotion = tf.keras.layers.Flatten()(x_emotion)
-    output_emotion = tf.keras.layers.Dense(num_classes_media,
+    output_emotion = tf.keras.layers.Dense(num_classes_emotion,
                                      kernel_initializer=initializer,
+                                     activation='softmax',
                                      name='output_emotion')(x_emotion)
     
     # Return the complete model

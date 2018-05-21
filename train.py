@@ -21,8 +21,8 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     # Compile the model
     optimizer = tf.keras.optimizers.Nadam(lr=0.002)
     model.compile(optimizer=optimizer, 
-                  loss={'output_media': 'sparse_categorical_crossentropy', 
-                        'output_emotion': 'sparse_categorical_crossentropy'},
+                  loss={'output_media': 'categorical_crossentropy', 
+                        'output_emotion': 'categorical_crossentropy'},
                   loss_weights={'output_media': 1., 'output_emotion': 1},
                   metrics=['accuracy'])
     
