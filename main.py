@@ -13,10 +13,9 @@ import time
 import os
 import numpy as np
 from argparse import ArgumentParser
-from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS
-from preprocessing import preprocess, Dataset
-from train import train, model_init_fn, optimizer_init_fn
-import logging
+from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
+from preprocessing import preprocess
+from train import train
 
 def build_parser():
     parser = ArgumentParser()
@@ -37,9 +36,6 @@ def build_parser():
                         help="flag to specify if images that cannot be loaded from disk should be removed (some BAM images are corrupt)",
                         action='store_false')
     parser.set_defaults(remove_broken=False)
-    parser.add_argument("--processes", dest="processes",
-                        help="number of processes you want to start to train the network",
-                        default="1")
     parser.add_argument("--device", dest="device", default="cpu",
                         help="device to be used to train")
     parser.add_argument("--log_folder", dest="log_folder",
@@ -47,6 +43,9 @@ def build_parser():
     return parser
 
 def main():
+    """
+    Wrapper to run the classification task
+    """
     # Parse command-line arguments
     parser = build_parser()
     options = parser.parse_args()
@@ -73,7 +72,7 @@ def main():
     
     elif options.mode == "train":
         # Create directory to save the results
-        results_dir = "train_results"
+        results_dir = "results"
         if not os.path.exists("./" + results_dir):
             os.makedirs("./" + results_dir)
         # Check if the given log folder already exists
@@ -84,21 +83,13 @@ def main():
             raise Exception('The given log folder already exists.')
         else:
             # Create a folder for each training run
-            os.makedirs(os.path.join(results_dir, options.log_folder))
-            # Save a log file
-            log_file = os.path.join(results_dir, options.log_folder, "programlog.log")
-            logging.basicConfig(filename=log_file, level=logging.INFO)
-            # Also print the log to console
-            stderrLogger=logging.StreamHandler()
-            stderrLogger.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
-            logging.getLogger().addHandler(stderrLogger)
+            log_folder = os.path.join(results_dir, options.log_folder)
+            os.makedirs(log_folder)
         
         # Preprocess the data and organize into three tuples (train, val/dev, test)
         # Each tuple consists of input arrays, media labels, and emotion labels
-        train_data, val_data, test_data = preprocess(DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS)
-        # Use Dataset class to properly batch the data
-        train_dset = Dataset(train_data[0], train_data[1], train_data[2], batch_size=64, shuffle=True)
-        val_dset = Dataset(val_data[0], val_data[1], val_data[2], batch_size=64, shuffle=False)
+        train_data, val_data, test_data = preprocess(DATA_DIR, INPUT_FILE, 
+                                                     MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
         
         # Specify the device:
         if options.device == "cpu":
@@ -106,7 +97,7 @@ def main():
         elif options.device == "gpu":
             device = "/device:GPU:0"
         # Train the model
-        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, device=device, num_epochs=1)
+        train(train_data, val_data, log_folder=log_folder, device=device, batch_size=64, num_epochs=1)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED

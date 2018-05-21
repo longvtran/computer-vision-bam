@@ -7,16 +7,29 @@ Created on Mon May 14 09:00:50 2018
 """
 
 import numpy as np
-import logging
-from data_utils import DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
 import os
 
 
 def preprocess(data_dir, input_file, media_label_file, emotion_label_file):
+    """
+    Load the dataset (including the input arrays and media/emotion labels) and
+    perform preprocessing on the input arrays
+    
+    Inputs:
+        - data_dir: the directory where the dataset is located
+        - input_file: the name of the npz file that stores input arrays
+        - media_label_file: the name of the npz file that stores media labels
+        - emotion_label_file: the name of the npz file that stores emotion labels
+    
+    Returns:
+        - train, dev, test, each of which is a tuple (input arrays, media labels, emotion labels)
+    """
+    
+    
     # Load the BAM dataset from .npz files and use appropriate data types and shapes
-    input_data = np.load(os.path.join(DATA_DIR, INPUT_FILE))
-    media_data = np.load(os.path.join(DATA_DIR, MEDIA_LABEL_FILE))
-    emotion_data = np.load(os.path.join(DATA_DIR, EMOTION_LABEL_FILE))
+    input_data = np.load(os.path.join(data_dir, input_file))
+    media_data = np.load(os.path.join(data_dir, media_label_file))
+    emotion_data = np.load(os.path.join(data_dir, emotion_label_file))
     
     # Read the train, dev, and test inputs together with their labels
     X_train = input_data['train']
@@ -37,15 +50,15 @@ def preprocess(data_dir, input_file, media_label_file, emotion_label_file):
     X_test = (X_test - mean_pixel) / std_pixel
     
     # Print the shapes for potential debugging
-    logging.info('Train data shape: %s', X_train.shape)
-    logging.info('Media train labels shape: %s, %s', y_media_train.shape, y_media_train.dtype)
-    logging.info('Emotion train labels shape: %s, %s', y_emotion_train.shape, y_emotion_train.dtype)
-    logging.info('Validation data shape: %s', X_val.shape)
-    logging.info('Media validation labels shape: %s, %s', y_media_val.shape, y_media_val.dtype)
-    logging.info('Emotion validation labels shape: %s, %s', y_emotion_val.shape, y_emotion_val.dtype)
-    logging.info('Test data shape: %s', X_test.shape)
-    logging.info('Media test labels shape: %s, %s', y_media_test.shape, y_media_test.dtype)
-    logging.info('Emotion test labels shape: %s, %s', y_emotion_test.shape, y_emotion_test.dtype)
+    print('Train data shape:', X_train.shape)
+    print('Media train labels shape:', y_media_train.shape, y_media_train.dtype)
+    print('Emotion train labels shape:', y_emotion_train.shape, y_emotion_train.dtype)
+    print('Validation data shape:', X_val.shape)
+    print('Media validation labels shape:', y_media_val.shape, y_media_val.dtype)
+    print('Emotion validation labels shape:', y_emotion_val.shape, y_emotion_val.dtype)
+    print('Test data shape:', X_test.shape)
+    print('Media test labels shape:', y_media_test.shape, y_media_test.dtype)
+    print('Emotion test labels shape:', y_emotion_test.shape, y_emotion_test.dtype)
     
     # Return tuples of train, dev, test
     train_data = (X_train, y_media_train, y_emotion_train)
@@ -53,27 +66,3 @@ def preprocess(data_dir, input_file, media_label_file, emotion_label_file):
     test_data = (X_test, y_media_test, y_emotion_test)
     
     return train_data, val_data, test_data
-
-class Dataset(object):
-    def __init__(self, X, y_media, y_emotion, batch_size, shuffle=False):
-        """
-        Construct a Dataset object to iterate over data X and labels y_media, y_emotion
-        
-        Inputs:
-        - X: Numpy array of data, of any shape
-        - y_media, y_emotion: Numpy arrays of media and emotion labels, of any 
-        shape but with y.shape[0] == X.shape[0]
-        - batch_size: Integer giving number of elements per minibatch
-        - shuffle: (optional) Boolean, whether to shuffle the data on each epoch
-        """
-        assert X.shape[0] == y_media.shape[0], 'Got different numbers of data and media labels'
-        assert X.shape[0] == y_emotion.shape[0], 'Got different numbers of data and emotin labels'
-        self.X, self.y_media, self.y_emotion = X, y_media, y_emotion
-        self.batch_size, self.shuffle = batch_size, shuffle
-
-    def __iter__(self):
-        N, B = self.X.shape[0], self.batch_size
-        idxs = np.arange(N)
-        if self.shuffle:
-            np.random.shuffle(idxs)
-        return iter((self.X[i:i+B], self.y_media[i:i+B], self.y_emotion[i:i+B]) for i in range(0, N, B))
