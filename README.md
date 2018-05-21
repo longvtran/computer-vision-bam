@@ -21,6 +21,8 @@ python main.py --mode=gen_data --no-update
 To train your model, run:
 
 ```
-python main.py --mode=train
+python main.py --mode=train --log_folder=1
 ```
+
+This will create a subfolder named `1` under the folder `results`.
 
