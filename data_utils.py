@@ -168,7 +168,7 @@ def load_data(update=False, remove_broken=False):
                     y_media[set_type].append(np.expand_dims(media_label, axis=0))
                     y_emotion[set_type].append(np.expand_dims(emotion_label, axis=0))
 
-                except (OSError, IndexError, KeyError):
+                except (OSError, IndexError, KeyError, ValueError):
                     print(f"Could not open: {img_path}")
                     if remove_broken: os.remove(img_path)
 
