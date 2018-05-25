@@ -37,15 +37,31 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
                                                 batch_size=batch_size, 
                                                 write_graph=True, write_images=True)
     
+    # Store best models during training
+    media_ckpt_file = os.path.join(log_folder, 'media' + '.{epoch:02d}-loss{:.2f}.h5')
+    media_ckpt = tf.keras.callbacks.ModelCheckpoint(media_ckpt_file, 
+                                              monitor='val_output_media_acc',
+                                              verbose=0, save_weights_only=False,
+                                              save_best_only=True, mode='auto',
+                                              period=1)
+    
+    emotion_ckpt_file = os.path.join(log_folder, 'emotion' + '.{epoch:02d}-loss{:.2f}.h5')
+    emotion_ckpt = tf.keras.callbacks.ModelCheckpoint(emotion_ckpt_file, 
+                                              monitor='val_output_emotion_acc',
+                                              verbose=0, save_weights_only=False,
+                                              save_best_only=True, mode='auto',
+                                              period=1)
+    
+    
     # Train the model
     model.fit(x, 
               {'output_media': y_media, 'output_emotion': y_emotion},
                epochs=num_epochs, batch_size=batch_size,
                validation_data=(x_val, [y_media_val, y_emotion_val]),
-               callbacks=[csv_logger, tsb_logger])
+               callbacks=[csv_logger, tsb_logger, media_ckpt, emotion_ckpt])
     
-    # Save the model
-    model_file = os.path.join(log_folder, 'model.h5')
+    # Save the final model
+    model_file = os.path.join(log_folder, 'final_model.h5')
     model.save(model_file)
     
     
