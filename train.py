@@ -8,7 +8,7 @@ Created on Sun May 13 02:31:23 2018
 
 import tensorflow as tf
 import os
-from model3 import ConvNet
+from model4 import ConvNet
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1, print_every=30):
     x, y_media, y_emotion = train_dset
