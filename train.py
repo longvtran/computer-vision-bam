@@ -8,7 +8,7 @@ Created on Sun May 13 02:31:23 2018
 
 import tensorflow as tf
 import os
-from model2 import ConvNet
+from model3 import ConvNet
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1, print_every=30):
     x, y_media, y_emotion = train_dset
@@ -33,9 +33,11 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     # Create tensorboard 
     tsb_dir = os.path.join(log_folder, 'tensorboard')
     tsb_logger = tf.keras.callbacks.TensorBoard(log_dir=tsb_dir,
-                                                histogram_freq=0,
+                                                histogram_freq=1,
                                                 batch_size=batch_size, 
-                                                write_graph=True, write_images=True)
+                                                write_graph=False, 
+                                                write_grads=False,
+                                                write_images=True)
     
     # Store best models during training
     media_ckpt_file = os.path.join(log_folder, 'media_ckpt_best.h5')
