@@ -33,7 +33,7 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     # Create tensorboard 
     tsb_dir = os.path.join(log_folder, 'tensorboard')
     tsb_logger = tf.keras.callbacks.TensorBoard(log_dir=tsb_dir,
-                                                histogram_freq=1,
+                                                histogram_freq=5,
                                                 batch_size=batch_size, 
                                                 write_graph=False, 
                                                 write_grads=False,
