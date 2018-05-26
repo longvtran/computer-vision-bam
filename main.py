@@ -97,7 +97,7 @@ def main():
         elif options.device == "gpu":
             device = "/device:GPU:0"
         # Train the model
-        train(train_data, val_data, log_folder=log_folder, device=device, batch_size=64, num_epochs=20)
+        train(train_data, val_data, log_folder=log_folder, device=device, batch_size=64, num_epochs=30)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED
