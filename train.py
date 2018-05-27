@@ -11,9 +11,9 @@ import tensorflow as tf
 import os
 from model6 import ConvNet
 
-def gen_generator(generator, X, y_media, y_emotion, batch_size, seed=7, num_classes_media=7):
+def gen_generator(generator, X, y_media, y_emotion, batch_size, num_classes_media=7):
     combine_labels = np.concatenate((y_media, y_emotion), axis=1) 
-    generator = generator.flow(X, combine_labels, batch_size=batch_size, seed=seed)
+    generator = generator.flow(X, combine_labels, batch_size=batch_size)
     while True:
         X_batch, combine_labels_batch =  generator.next()
         y_media_batch = combine_labels_batch[:, :num_classes_media]
