@@ -6,11 +6,14 @@ Created on Sun May 13 02:31:23 2018
 @author: longtran
 """
 
+import numpy as np
 import tensorflow as tf
 import os
-from model6 import ConvNet
+from model2 import ConvNet
+from preprocessing import gen_generator
 
-def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1, print_every=30):
+def train(train_dset, val_dset, train_datagen, log_folder, device='/cpu:0', 
+          batch_size=64, num_epochs=1):
     x, y_media, y_emotion = train_dset
     x_val, y_media_val, y_emotion_val = val_dset
     model = ConvNet()
@@ -55,9 +58,8 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
                                               period=1)    
     
     # Train the model
-    model.fit(x, 
-              {'output_media': y_media, 'output_emotion': y_emotion},
-               epochs=num_epochs, batch_size=batch_size,
+    model.fit_generator(gen_generator(train_datagen, x, y_media, y_emotion, batch_size=batch_size),
+               epochs=num_epochs, steps_per_epoch= np.ceil(len(x) / batch_size),
                validation_data=(x_val, [y_media_val, y_emotion_val]),
                callbacks=[csv_logger, tsb_logger, media_ckpt, emotion_ckpt])
     

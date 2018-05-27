@@ -14,7 +14,7 @@ import os
 import numpy as np
 from argparse import ArgumentParser
 from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
-from preprocessing import preprocess
+from preprocessing import load_data, preprocess
 from train import train
 
 def build_parser():
@@ -36,6 +36,13 @@ def build_parser():
                         help="flag to specify if images that cannot be loaded from disk should be removed (some BAM images are corrupt)",
                         action='store_false')
     parser.set_defaults(remove_broken=False)
+    parser.add_argument("--augment", dest="augment",
+                        help="flag to specify if images should be augmented)",
+                        action='store_true')
+    parser.add_argument("--no-augment", dest="augment",
+                        help="flag to specify if images should be augmented)",
+                        action='store_false')
+    parser.set_defaults(augment_data=False)
     parser.add_argument("--device", dest="device", default="cpu",
                         help="device to be used to train")
     parser.add_argument("--log_folder", dest="log_folder",
@@ -88,8 +95,9 @@ def main():
         
         # Preprocess the data and organize into three tuples (train, val/dev, test)
         # Each tuple consists of input arrays, media labels, and emotion labels
-        train_data, val_data, test_data = preprocess(DATA_DIR, INPUT_FILE, 
+        train_data, val_data, test_data = load_data(DATA_DIR, INPUT_FILE, 
                                                      MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
+        train_datagen = preprocess(train_data, augment=options.augment)
         
         # Specify the device:
         if options.device == "cpu":
@@ -97,7 +105,8 @@ def main():
         elif options.device == "gpu":
             device = "/device:GPU:0"
         # Train the model
-        train(train_data, val_data, log_folder=log_folder, device=device, batch_size=64, num_epochs=30)
+        train(train_data, val_data, train_datagen,
+              log_folder=log_folder, device=device, batch_size=64, num_epochs=2)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED
