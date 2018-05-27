@@ -9,7 +9,7 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model6 import ConvNet
+from model4 import ConvNet
 
 def gen_generator(generator, X, y_media, y_emotion, batch_size, num_classes_media=7):
     combine_labels = np.concatenate((y_media, y_emotion), axis=1) 
