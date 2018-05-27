@@ -76,7 +76,7 @@ def preprocess(train_data, augment=False):
     if augment:
         train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                                         featurewise_std_normalization=True,
-                                                                        zca_whitening=True,
+                                                                        zca_whitening=False,
                                                                         shear_range=0.2,
                                                                         zoom_range=0.0,
                                                                         horizontal_flip=False,
