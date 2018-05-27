@@ -87,13 +87,4 @@ def preprocess(train_data, augment=False):
     
     train_datagen.fit(X_train)
     return train_datagen
-
-def gen_generator(generator, X, y_media, y_emotion, batch_size, seed=7, num_classes_media=7):
-    combine_labels = np.concatenate((y_media, y_emotion), axis=1) 
-    generator = generator.flow(X, combine_labels, batch_size=batch_size, seed=seed)
-    while True:
-        X_batch, combine_labels_batch =  generator.next()
-        y_media_batch = combine_labels_batch[:, :num_classes_media]
-        y_emotion_batch = combine_labels_batch[:, num_classes_media:]
-        yield (X_batch, {'output_media': y_media_batch, 'output_emotion': y_emotion_batch})
     
