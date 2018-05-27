@@ -55,15 +55,6 @@ def load_data(data_dir, input_file, media_label_file, emotion_label_file):
     print('Media test labels shape:', y_media_test.shape, y_media_test.dtype)
     print('Emotion test labels shape:', y_emotion_test.shape, y_emotion_test.dtype)
     
-    # Normalize validation and test data: subtract the mean pixel and divide by std
-    # from the train data (Note that the normalization of the train data happens
-    # through ImageDataGenerator)
-#    mean_pixel = X_train.mean(axis=(0, 1, 2), keepdims=True)
-#    std_pixel = X_train.std(axis=(0, 1, 2), keepdims=True)
-#    X_val = (X_val - mean_pixel) / std_pixel
-#    X_test = (X_test - mean_pixel) / std_pixel
-    
-    
     # Return tuples of train, dev, test
     train_data = (X_train, y_media_train, y_emotion_train)
     val_data = (X_val, y_media_val, y_emotion_val)
@@ -86,10 +77,10 @@ def preprocess(train_data, augment=False):
         print("Images are only centered and standardized...")
         train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                                         featurewise_std_normalization=True)
-        val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
+    
+    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                                         featurewise_std_normalization=True)
     
     train_datagen.fit(X_train)
     val_datagen.fit(X_train)
     return train_datagen, val_datagen
-    
