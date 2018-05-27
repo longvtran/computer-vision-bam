@@ -58,10 +58,10 @@ def load_data(data_dir, input_file, media_label_file, emotion_label_file):
     # Normalize validation and test data: subtract the mean pixel and divide by std
     # from the train data (Note that the normalization of the train data happens
     # through ImageDataGenerator)
-    mean_pixel = X_train.mean(axis=(0, 1, 2), keepdims=True)
-    std_pixel = X_train.std(axis=(0, 1, 2), keepdims=True)
-    X_val = (X_val - mean_pixel) / std_pixel
-    X_test = (X_test - mean_pixel) / std_pixel
+#    mean_pixel = X_train.mean(axis=(0, 1, 2), keepdims=True)
+#    std_pixel = X_train.std(axis=(0, 1, 2), keepdims=True)
+#    X_val = (X_val - mean_pixel) / std_pixel
+#    X_test = (X_test - mean_pixel) / std_pixel
     
     
     # Return tuples of train, dev, test
@@ -74,6 +74,7 @@ def load_data(data_dir, input_file, media_label_file, emotion_label_file):
 def preprocess(train_data, augment=False):   
     X_train = train_data[0]
     if augment:
+        print("Images are augmented...")
         train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                                         featurewise_std_normalization=True,
                                                                         zca_whitening=False,
@@ -82,9 +83,13 @@ def preprocess(train_data, augment=False):
                                                                         horizontal_flip=False,
                                                                         vertical_flip=True)
     else:
+        print("Images are only centered and standardized...")
         train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
+                                                                        featurewise_std_normalization=True)
+        val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                                         featurewise_std_normalization=True)
     
     train_datagen.fit(X_train)
-    return train_datagen
+    val_datagen.fit(X_train)
+    return train_datagen, val_datagen
     

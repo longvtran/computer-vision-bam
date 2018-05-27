@@ -97,7 +97,7 @@ def main():
         # Each tuple consists of input arrays, media labels, and emotion labels
         train_data, val_data, test_data = load_data(DATA_DIR, INPUT_FILE, 
                                                      MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
-        train_datagen = preprocess(train_data, augment=options.augment)
+        train_datagen, val_datagen = preprocess(train_data, augment=options.augment)
         
         # Specify the device:
         if options.device == "cpu":
@@ -105,7 +105,7 @@ def main():
         elif options.device == "gpu":
             device = "/device:GPU:0"
         # Train the model
-        train(train_data, val_data, train_datagen,
+        train(train_data, val_data, train_datagen, val_datagen,
               log_folder=log_folder, device=device, batch_size=64, num_epochs=30)
         
     elif options.mode == "eval":

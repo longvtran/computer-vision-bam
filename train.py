@@ -20,7 +20,7 @@ def gen_generator(generator, X, y_media, y_emotion, batch_size, num_classes_medi
         y_emotion_batch = combine_labels_batch[:, num_classes_media:]
         yield (X_batch, {'output_media': y_media_batch, 'output_emotion': y_emotion_batch})
 
-def train(train_dset, val_dset, train_datagen, log_folder, device='/cpu:0', 
+def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='/cpu:0', 
           batch_size=64, num_epochs=1):
     x, y_media, y_emotion = train_dset
     x_val, y_media_val, y_emotion_val = val_dset
@@ -44,11 +44,11 @@ def train(train_dset, val_dset, train_datagen, log_folder, device='/cpu:0',
     # Create tensorboard 
     tsb_dir = os.path.join(log_folder, 'tensorboard')
     tsb_logger = tf.keras.callbacks.TensorBoard(log_dir=tsb_dir,
-                                                histogram_freq=5,
+                                                histogram_freq=0,
                                                 batch_size=batch_size, 
                                                 write_graph=False, 
                                                 write_grads=False,
-                                                write_images=True)
+                                                write_images=False)
     
     # Store best models during training
     media_ckpt_file = os.path.join(log_folder, 'media_ckpt_best.h5')
@@ -68,7 +68,8 @@ def train(train_dset, val_dset, train_datagen, log_folder, device='/cpu:0',
     # Train the model
     model.fit_generator(gen_generator(train_datagen, x, y_media, y_emotion, batch_size=batch_size),
                epochs=num_epochs, steps_per_epoch= np.ceil(len(x) / batch_size),
-               validation_data=(x_val, [y_media_val, y_emotion_val]),
+               validation_data=gen_generator(val_datagen, x_val, y_media_val, y_emotion_val, batch_size=batch_size),
+               validation_steps = np.ceil(len(x_val) / batch_size),
                callbacks=[csv_logger, tsb_logger, media_ckpt, emotion_ckpt])
     
     # Save the final model
