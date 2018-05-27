@@ -48,7 +48,9 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
                                kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x_media)
     x_media = tf.keras.layers.MaxPooling2D(2, 2)(x_media)
     x_media = tf.keras.layers.Flatten()(x_media)
-    x_media = tf.keras.layers.Dense(units=64, kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x_media)
+    x_media = tf.keras.layers.Dense(units=64, 
+                                    kernel_regularizer=tf.keras.regularizers.l2(1e-3),
+                                    activation='relu')(x_media)
     x_media = tf.keras.layers.Dropout(rate=0.5)(x_media)
     output_media = tf.keras.layers.Dense(num_classes_media,
                                    kernel_initializer=initializer,
@@ -68,7 +70,9 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
                                  kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x_emotion)
     x_emotion = tf.keras.layers.MaxPooling2D(2, 2)(x_emotion)
     x_emotion = tf.keras.layers.Flatten()(x_emotion)
-    x_emotion = tf.keras.layers.Dense(units=64, kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x_emotion)
+    x_emotion = tf.keras.layers.Dense(units=64, 
+                                      kernel_regularizer=tf.keras.regularizers.l2(1e-3),
+                                      activation='relu')(x_emotion)
     x_emotion = tf.keras.layers.Dropout(rate=0.5)(x_emotion)
     output_emotion = tf.keras.layers.Dense(num_classes_emotion,
                                      kernel_initializer=initializer,
