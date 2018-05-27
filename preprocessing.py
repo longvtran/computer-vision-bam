@@ -74,7 +74,7 @@ def preprocess(train_data, augment=False):
                                                                         horizontal_flip=False,
                                                                         vertical_flip=True)
     else:
-        print("Images are only centered and standardized...")
+        print("Images are only centered and normalized...")
         train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                                         featurewise_std_normalization=True)
     
