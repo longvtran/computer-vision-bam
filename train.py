@@ -75,5 +75,4 @@ def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='
     # Save the final model
     model_file = os.path.join(log_folder, 'last_ckpt.h5')
     model.save(model_file)
-    
-    
+
