@@ -13,9 +13,9 @@ import time
 import os
 import numpy as np
 from argparse import ArgumentParser
-from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS
-from preprocessing import preprocess, Dataset
-from train import train, model_init_fn, optimizer_init_fn
+from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
+from preprocessing import load_data, preprocess
+from train import train
 
 def build_parser():
     parser = ArgumentParser()
@@ -36,16 +36,24 @@ def build_parser():
                         help="flag to specify if images that cannot be loaded from disk should be removed (some BAM images are corrupt)",
                         action='store_false')
     parser.set_defaults(remove_broken=False)
-    parser.add_argument("--processes", dest="processes",
-                        help="number of processes you want to start to train the network",
-                        default="1")
+    parser.add_argument("--augment", dest="augment",
+                        help="flag to specify if images should be augmented)",
+                        action='store_true')
+    parser.add_argument("--no-augment", dest="augment",
+                        help="flag to specify if images should be augmented)",
+                        action='store_false')
+    parser.set_defaults(augment_data=False)
     parser.add_argument("--device", dest="device", default="cpu",
                         help="device to be used to train")
-    parser.add_argument("--folder", dest="folder", type=int,
-                        help="folder(int) to load the config, neglect this option if loading from ./computer-vision-bam/net_config.json")
+    parser.add_argument("--log_folder", dest="log_folder",
+                        help="log folder to save log files from training")
     return parser
 
 def main():
+    """
+    Wrapper to run the classification task
+    """
+    # Parse command-line arguments
     parser = build_parser()
     options = parser.parse_args()
     
@@ -70,10 +78,35 @@ def main():
 
     
     elif options.mode == "train":
-        train_data, val_data, test_data = preprocess(DATA_DIR, INPUT_FILE, MEDIA_LABELS, EMOTION_LABELS)
-        train_dset = Dataset(train_data[0], train_data[1], train_data[2], batch_size=64, shuffle=True)
-        val_dset = Dataset(val_data[0], val_data[1], val_data[2], batch_size=64, shuffle=False)
-        train(model_init_fn, optimizer_init_fn, train_dset, val_dset, num_epochs=20)
+        # Create directory to save the results
+        results_dir = "results"
+        if not os.path.exists("./" + results_dir):
+            os.makedirs("./" + results_dir)
+        # Check if the given log folder already exists
+        results_subdirs = os.listdir("./" + results_dir)
+        if not options.log_folder:
+            raise Exception('Please specify log_folder argument to store results.')
+        elif options.log_folder in results_subdirs:
+            raise Exception('The given log folder already exists.')
+        else:
+            # Create a folder for each training run
+            log_folder = os.path.join(results_dir, options.log_folder)
+            os.makedirs(log_folder)
+        
+        # Preprocess the data and organize into three tuples (train, val/dev, test)
+        # Each tuple consists of input arrays, media labels, and emotion labels
+        train_data, val_data, test_data = load_data(DATA_DIR, INPUT_FILE, 
+                                                     MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
+        train_datagen, val_datagen = preprocess(train_data, augment=options.augment)
+        
+        # Specify the device:
+        if options.device == "cpu":
+            device = "/cpu:0"
+        elif options.device == "gpu":
+            device = "/device:GPU:0"
+        # Train the model
+        train(train_data, val_data, train_datagen, val_datagen,
+              log_folder=log_folder, device=device, batch_size=64, num_epochs=50)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED
