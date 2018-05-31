@@ -33,7 +33,7 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
                                      kernel_initializer=initializer,
                                      kernel_regularizer=tf.keras.regularizers.l2(1e-3))(inputs)
     x = tf.keras.layers.MaxPooling2D(2, 2)(x)
-    x = tf.keras.layers.BatchNormalization()(x) 
+#    x = tf.keras.layers.BatchNormalization()(x) 
     x = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), padding='same', 
                                      activation=tf.nn.relu, 
                                      kernel_initializer=initializer,
