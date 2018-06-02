@@ -106,7 +106,7 @@ def main():
             device = "/device:GPU:0"
         # Train the model
         train(train_data, val_data, train_datagen, val_datagen,
-              log_folder=log_folder, device=device, batch_size=64, num_epochs=80)
+              log_folder=log_folder, device=device, batch_size=64, num_epochs=100)
         
     elif options.mode == "eval":
         # TO BE IMPLEMENTED
