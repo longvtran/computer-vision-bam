@@ -1,3 +1,4 @@
+import pdb
 import numpy as np
 import tensorflow as tf
 from scipy.misc import imread, imresize, imsave
@@ -11,7 +12,7 @@ from ourmodel import OurModel
 
 IMG_SIZE = (128, 128)
 
-def our_load(filename):
+def our_load_image(filename):
     """
     Load an image and resize to the specified size for use in our trained
     models. Return in a format for preprocess to work.
@@ -19,7 +20,7 @@ def our_load(filename):
     img = imread(filename)
     img = imresize(img, IMG_SIZE)
     img = np.expand_dims(img, axis=0)
-    return (img, )
+    return img
 
 SQUEEZENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 SQUEEZENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -59,10 +60,17 @@ class StyleConfig:
         self.style_size = 512
 
         # layers used for the loss and how much to weight the loss
+        """
         self.content_layer = 3
         self.content_weight = 5e-2
         self.style_layers = [1, 4, 6, 7]
         self.style_weights = [200000, 500, 12, 1]
+        self.tv_weight = 5e-2
+        """
+        self.content_layer = 2
+        self.content_weight = 5e-2
+        self.style_layers = [1, 3]
+        self.style_weights = [200000, 20]
         self.tv_weight = 5e-2
 
         # transfer settings
@@ -121,8 +129,12 @@ class StyleNetwork:
 
     def transfer(self, content_image, style_image):
         # Create placeholder for the input image that will be modified
-        input_image = tf.placeholder('float', shape=[None,None,None,3],
-                                     name='input_image')
+        if self.model_type == "squeezenet":
+            input_image = tf.placeholder('float', shape=[None,None,None,3],
+                                         name='input_image')
+        elif self.model_type == "ours":
+            input_image = tf.placeholder('float', shape=[None,128,128,3],
+                                         name='input_image')
 
         # Extract features from the content image
         if self.model_type == "ours":
@@ -132,12 +144,12 @@ class StyleNetwork:
             _, val_datagen = our_preprocess(train_data)
             content_img = val_datagen.flow(our_load_image(content_image),
                                            batch_size=1)
-            print(content_img.shape)
-            content_img = np.squeeze(content_img)
+            content_img = np.squeeze(content_img[0])
         elif self.model_type == "squeezenet":
             content_img = squeezenet_preprocess(squeezenet_load(content_image,
                                                                 self.config.image_size))
         features = self.model.extract_features(input_image)
+        pdb.set_trace()
         content_target = sess.run(features[self.config.content_layer],
                                   {input_image: content_img[None]})
 
@@ -145,8 +157,7 @@ class StyleNetwork:
         if self.model_type == "ours":
             style_img = val_datagen.flow(our_load_image(style_image),
                                          batch_size=1)
-            print(style_img.shape)
-            style_img = np.squeeze(style_img)
+            style_img = np.squeeze(style_img[0])
         elif self.model_type == "squeezenet":
             style_img = squeezenet_preprocess(squeezenet_load(style_image,
                                                               self.config.style_size))

@@ -3,13 +3,20 @@ import tensorflow as tf
 from model6 import ConvNet as Model6
 
 class OurModel():
-    def __init__(self, save_path):
+    def __init__(self, save_path, sess):
         self.model = tf.keras.models.load_model(save_path)
 
-    def extract_features():
-        layers = self.model.get_weights()
-        pdb.set_trace()
-        return layers
+    def extract_features(self, input_image):
+        self.model.layers.pop(0)
+        input_layer = tf.keras.Input(tensor=input_image)
+        output_layer = self.model(input_layer)
+        self.model = tf.keras.Model(input_layer, output_layer)
+        layers = [l.output for l in self.model.get_layer(index=1).layers]
+        conv_layers = []
+        for i, l in enumerate(layers):
+            if i in [0, 3, 4, 9, 10]:
+                conv_layers.append(l)
+        return conv_layers
 
 class OurModel2(tf.keras.Model):
     def extract_features(self, inputs=None, reuse=True):
