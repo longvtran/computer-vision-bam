@@ -9,7 +9,7 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model6 import ConvNet
+from model8 import ConvNet
 
 def gen_generator(generator, X, y_media, y_emotion, batch_size, num_classes_media=7):
     combine_labels = np.concatenate((y_media, y_emotion), axis=1) 
@@ -34,7 +34,7 @@ def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='
     model.compile(optimizer=optimizer, 
                   loss={'output_media': 'categorical_crossentropy', 
                         'output_emotion': 'categorical_crossentropy'},
-                  loss_weights={'output_media': 1., 'output_emotion': 1},
+                  loss_weights={'output_media': 1., 'output_emotion': 1.},
                   metrics=['accuracy'])
     
     # Save training results to a log file
