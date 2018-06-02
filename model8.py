@@ -32,7 +32,7 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
                                      activation=tf.nn.relu, 
                                      kernel_initializer=initializer,
                                      kernel_regularizer=tf.keras.regularizers.l2(1e-3))(inputs)
-    x = tf.keras.layers.MaxPooling2D(2, 2)(x)
+#    x = tf.keras.layers.MaxPooling2D(2, 2)(x)
 #    x = tf.keras.layers.BatchNormalization()(x) 
     x = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), padding='same', 
                                      activation=tf.nn.relu, 
@@ -65,11 +65,11 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
     x_media = tf.keras.layers.Dense(units=1024, 
                                     kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                     activation=tf.nn.relu)(x_media)
-    x_media = tf.keras.layers.Dropout(rate=0.7)(x_media)
+    x_media = tf.keras.layers.Dropout(rate=0.5)(x_media)
     x_media = tf.keras.layers.Dense(units=1024, 
                                     kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                     activation=tf.nn.relu)(x_media)
-    x_media = tf.keras.layers.Dropout(rate=0.7)(x_media)
+    x_media = tf.keras.layers.Dropout(rate=0.5)(x_media)
     output_media = tf.keras.layers.Dense(num_classes_media,
                                    kernel_initializer=initializer,
                                    activation='softmax',
@@ -95,11 +95,11 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
     x_emotion = tf.keras.layers.Dense(units=1024, 
                                       kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                       activation=tf.nn.relu)(x_emotion)
-    x_emotion = tf.keras.layers.Dropout(rate=0.6)(x_emotion)
+    x_emotion = tf.keras.layers.Dropout(rate=0.4)(x_emotion)
     x_emotion = tf.keras.layers.Dense(units=1024, 
                                       kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                       activation=tf.nn.relu)(x_emotion)
-    x_emotion = tf.keras.layers.Dropout(rate=0.6)(x_emotion)
+    x_emotion = tf.keras.layers.Dropout(rate=0.4)(x_emotion)
     output_emotion = tf.keras.layers.Dense(num_classes_emotion,
                                      kernel_initializer=initializer,
                                      activation='softmax',
