@@ -46,8 +46,8 @@ def ConvNet(num_classes_media=7, num_classes_emotion=4, training=False):
                                activation=tf.nn.relu, 
                                kernel_initializer=initializer,
                                kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x_media = tf.keras.layers.MaxPooling2D(2, 2)(x_media)
-    x_media = tf.keras.layers.BatchNormalization()(x_media)
+#    x_media = tf.keras.layers.MaxPooling2D(2, 2)(x_media)
+#    x_media = tf.keras.layers.BatchNormalization()(x_media)
     x_media = tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), padding='same', 
                                activation=tf.nn.relu, 
                                kernel_initializer=initializer,
