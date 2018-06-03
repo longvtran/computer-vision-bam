@@ -116,7 +116,7 @@ class StyleNetwork:
         U = transfer_img[:, :-1, ...]
         D = transfer_img[:, 1:, ...]
         loss = self.config.tv_weight * (tf.reduce_sum((L - R)**2)
-                                 + tf.reduce_sum((U - D)**2))
+                                        + tf.reduce_sum((U - D)**2))
         return loss
 
     def loss(self, features, transfer_img, content_target, style_targets):
@@ -129,11 +129,11 @@ class StyleNetwork:
 
     def transfer(self, content_image, style_image):
         # Create placeholder for the input image that will be modified
-        if self.model_type == "squeezenet":
-            input_image = tf.placeholder('float', shape=[None,None,None,3],
-                                         name='input_image')
-        elif self.model_type == "ours":
+        if self.model_type == "ours":
             input_image = tf.placeholder('float', shape=[None,128,128,3],
+                                         name='input_image')
+        elif self.model_type == "squeezenet":
+            input_image = tf.placeholder('float', shape=[None,None,None,3],
                                          name='input_image')
 
         # Extract features from the content image
@@ -149,7 +149,10 @@ class StyleNetwork:
             content_img = squeezenet_preprocess(squeezenet_load(content_image,
                                                                 self.config.image_size))
         features = self.model.extract_features(input_image)
-        pdb.set_trace()
+        #if self.model_type == "ours":
+            #content_target = sess.run(features[self.config.content_layer],
+                                      #{self.model.model.input: content_img[None]})
+        #elif self.model_type == "squeezenet":
         content_target = sess.run(features[self.config.content_layer],
                                   {input_image: content_img[None]})
 
@@ -163,6 +166,10 @@ class StyleNetwork:
                                                               self.config.style_size))
         style_target_vars = [self.gram_matrix(features[l])
                              for l in self.config.style_layers]
+        #if self.model_type == "ours":
+            #style_targets = sess.run(style_target_vars,
+                                     #{self.model.model.input: style_img[None]})
+        #elif self.model_type == "squeezenet":
         style_targets = sess.run(style_target_vars,
                                  {input_image: style_img[None]})
 
@@ -180,6 +187,7 @@ class StyleNetwork:
         opt_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=opt_scope.name)
         sess.run(tf.variables_initializer([lr_var, img_var] + opt_vars))
         # Create an op that will clamp the image values when run
+        # TODO: investigate making this a hyper parameter
         clamp_image_op = tf.assign(img_var, tf.clip_by_value(img_var, -1.5, 1.5))
 
         # Transfer update loop
@@ -208,7 +216,6 @@ if __name__ == "__main__":
     with tf.Session() as sess:
         model = OurModel(save_path=model_path, sess=sess)
         #model = SqueezeNet(save_path=weight_path, sess=sess)
-        # TODO: update model calls to model.model
         style_transfer = StyleNetwork(config, model, model_type)
         style_transfer.transfer(content_image, style_image)
 

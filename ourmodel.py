@@ -3,10 +3,43 @@ import tensorflow as tf
 from model6 import ConvNet as Model6
 
 class OurModel():
-    def __init__(self, save_path, sess):
-        self.model = tf.keras.models.load_model(save_path)
+    def __init__(self, save_path=None, sess=None):
+        if save_path is None:
+            self.model = Model6()
+        else:
+            self.model = tf.keras.models.load_model(save_path)
 
-    def extract_features(self, input_image):
+    def extract_features(self, input_image=None):
+        pdb.set_trace()
+        if input_image is None:
+            input_image = self.model.input
+        layers = []
+        input_layer = tf.keras.Input(tensor=input_image)
+        self.model.layers.pop(0)
+        output_layer = self.model(input_layer)
+        our_model = tf.keras.Model(input_layer, output_layer)
+        for l in our_model.layers[1].layers:
+            if l.name[:6] == "conv2d":
+                layers.append(l.output)
+        return layers
+
+class OurModel3():
+    def __init__(self, save_path, sess):
+        our_model = tf.keras.models.load_model(save_path)
+        self.model = our_model(input_tensor=input_layer)
+        # save just the weights then load the weights with the new session?
+
+    def extract_features(self, input_image=None):
+        pdb.set_trace()
+        layers = [l.output for l in self.model.get_layer(index=1).layers]
+        conv_layers = []
+        for i, l in enumerate(layers):
+            if i in [0, 3, 4, 9, 10]:
+                conv_layers.append(l)
+        return conv_layers
+
+    def extract_features1(self, input_image):
+        pdb.set_trace()
         self.model.layers.pop(0)
         input_layer = tf.keras.Input(tensor=input_image)
         output_layer = self.model(input_layer)
