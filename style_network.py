@@ -67,11 +67,15 @@ class StyleConfig:
         self.style_weights = [200000, 500, 12, 1]
         self.tv_weight = 5e-2
         """
-        self.content_layer = 2
+        # Best content layers for our model seem to be 0, 1, and 2
+        # Do not use the content layer in the list of style layers
+        self.content_layer = 0
         self.content_weight = 5e-2
-        self.style_layers = [1, 3]
-        self.style_weights = [200000, 20]
+        # Layers 1 and 2 are media, 3 and 4 are emotion
+        self.style_layers = [3, 4]
+        self.style_weights = [2000, 10]
         self.tv_weight = 5e-2
+        self.clamp_value = 2
 
         # transfer settings
         self.initial_lr = 3.0
@@ -188,7 +192,12 @@ class StyleNetwork:
         sess.run(tf.variables_initializer([lr_var, img_var] + opt_vars))
         # Create an op that will clamp the image values when run
         # TODO: investigate making this a hyper parameter
-        clamp_image_op = tf.assign(img_var, tf.clip_by_value(img_var, -1.5, 1.5))
+        clamp_image_op = tf.assign(
+                img_var,
+                tf.clip_by_value(img_var,
+                                 -self.config.clamp_value,
+                                 self.config.clamp_value)
+            )
 
         # Transfer update loop
         for t in range(self.config.num_iters + 1):
@@ -209,9 +218,9 @@ if __name__ == "__main__":
     model_type = "ours"
     model_path = 'weights/media_ckpt_best.h5'
     #weight_path = "weights/squeezenet.ckpt"
-    content_image = "data/train/media_oilpaint/emotion_happy/119420229.jpg"
+    content_image = "data/train/media_oilpaint/emotion_peaceful/20164695.jpg"
     #content_image = "styles/tubingen.jpg"
-    style_image = "data/train/media_watercolor/emotion_happy/151337707.jpg"
+    style_image = "data/train/media_oilpaint/emotion_scary/42142915.jpg"
     #style_image = "styles/composition_vii.jpg"
     with tf.Session() as sess:
         model = OurModel(save_path=model_path, sess=sess)
