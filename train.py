@@ -31,7 +31,7 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     model.compile(optimizer=optimizer, 
                   loss={'output_media': 'categorical_crossentropy', 
                         'output_emotion': 'categorical_crossentropy'},
-                  loss_weights={'output_media': 1.2, 'output_emotion': 1.},
+                  loss_weights={'output_media': 1, 'output_emotion': 1.},
                   metrics=['accuracy'])
     
     # Save training results to a log file
