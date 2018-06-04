@@ -9,13 +9,18 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model7 import ConvNet
+from model8 import ConvNet
+from model_vgg19 import VGG19
 
-def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1):
+def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1,
+          model_type="custom"):
     x, y_media, y_emotion = train_dset
     x_val, y_media_val, y_emotion_val = val_dset
-    model = ConvNet()
-    
+    if model_type == "custom":
+        model = ConvNet()
+    elif model_type == "vgg19":
+        pass
+        
     # summarize layers
     # print(model.summary())
     
@@ -24,7 +29,7 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     model.compile(optimizer=optimizer, 
                   loss={'output_media': 'categorical_crossentropy', 
                         'output_emotion': 'categorical_crossentropy'},
-                  loss_weights={'output_media': 1., 'output_emotion': 1.},
+                  loss_weights={'output_media': 1.2, 'output_emotion': 1.},
                   metrics=['accuracy'])
     
     # Save training results to a log file

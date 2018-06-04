@@ -113,9 +113,8 @@ def main():
         train(train_dset, val_dset, log_folder=log_folder, device=device, 
               batch_size=64, num_epochs=100)
         
-    elif options.mode == "eval":
-        # TO BE IMPLEMENTED
-        pass
+    elif options.mode == "train_vgg":
+        # Load the VGG19 model, add a few layers on top
     
     elif options.mode == "test":
         # TO BE IMPLEMENTED
