@@ -50,9 +50,9 @@ def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
     x_media = tf.keras.layers.BatchNormalization()(x_media)
     x_media = tf.keras.layers.Flatten()(x_media)
     x_media = tf.keras.layers.Dense(units=1024, 
-                                    kernel_regularizer=tf.keras.regularizers.l2(1e-3),
+                                    kernel_regularizer=tf.keras.regularizers.l2(5e-3),
                                     activation=tf.nn.relu)(x_media)
-    x_media = tf.keras.layers.Dropout(rate=0.85)(x_media)
+    x_media = tf.keras.layers.Dropout(rate=0.9)(x_media)
     output_media = tf.keras.layers.Dense(num_classes_media,
                                    kernel_initializer=initializer,
                                    activation='softmax',
