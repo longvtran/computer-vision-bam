@@ -115,7 +115,7 @@ def main():
         
         # Train the model
         train(train_dset, val_dset, log_folder=log_folder, device=device, 
-              batch_size=64, num_epochs=100, model_type=options.model_type)
+              batch_size=64, num_epochs=200, model_type=options.model_type)
     
     elif options.mode == "test":
         # TO BE IMPLEMENTED
