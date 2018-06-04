@@ -17,8 +17,10 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     x, y_media, y_emotion = train_dset
     x_val, y_media_val, y_emotion_val = val_dset
     if model_type == "custom":
+        print("Using custom model...")
         model = ConvNet()
     elif model_type == "vgg19":
+        print("Using pre-trained VGG19 model...")
         model=VGG19()
         
     # summarize layers
