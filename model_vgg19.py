@@ -46,6 +46,8 @@ def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
                                activation=tf.nn.relu, 
                                kernel_initializer=initializer,
                                kernel_regularizer=tf.keras.regularizers.l2(1e-3))(last_x)
+    x_media = tf.keras.layers.MaxPooling2D(2, 2)(x_media)
+    x_media = tf.keras.layers.Flatten()(x_media)
     x_media = tf.keras.layers.Dense(units=1024, 
                                     kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                     activation=tf.nn.relu)(x_media)
@@ -60,6 +62,8 @@ def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
                                  activation=tf.nn.relu, 
                                  kernel_initializer=initializer,
                                  kernel_regularizer=tf.keras.regularizers.l2(1e-3))(last_x)
+    x_emotion = tf.keras.layers.MaxPooling2D(2, 2)(x_emotion)
+    x_emotion = tf.keras.layers.Flatten()(x_emotion)
     x_emotion = tf.keras.layers.Dense(units=1024, 
                                       kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                       activation=tf.nn.relu)(x_emotion)
