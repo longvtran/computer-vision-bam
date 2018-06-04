@@ -9,7 +9,7 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model8 import ConvNet
+from model7 import ConvNet
 from model_vgg19 import VGG19
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1,
@@ -19,7 +19,7 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     if model_type == "custom":
         model = ConvNet()
     elif model_type == "vgg19":
-        pass
+        model=VGG19()
         
     # summarize layers
     # print(model.summary())

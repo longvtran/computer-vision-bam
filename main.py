@@ -44,6 +44,10 @@ def build_parser():
                         help="flag to specify if images should be augmented)",
                         action='store_false')
     parser.set_defaults(augment_data=False)
+    # Model type to train
+    parser.add_argument("--model_type", dest="model_type",
+                        help="flag to specify which model to train: custom, or vgg19",
+                        default="custom")
     parser.add_argument("--device", dest="device", default="cpu",
                         help="device to be used to train")
     parser.add_argument("--log_folder", dest="log_folder",
@@ -111,11 +115,7 @@ def main():
         
         # Train the model
         train(train_dset, val_dset, log_folder=log_folder, device=device, 
-              batch_size=64, num_epochs=100)
-        
-    elif options.mode == "train_vgg":
-        # Load the VGG19 model, add a few layers on top
-        pass
+              batch_size=64, num_epochs=100, model_type=options.model_type)
     
     elif options.mode == "test":
         # TO BE IMPLEMENTED

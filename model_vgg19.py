@@ -34,46 +34,18 @@ def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
                                                    input_tensor=inputs,
                                                    input_shape=(128,128,3))
     
+    # Freeze all except the last five layers of VGG19 (4 conv and 1 pooling layer)
+    for layer in base_vgg19.layers:
+        layer.trainable = False
     
-    
-    x = tf.keras.layers.Conv2D(filters=64, kernel_size=(5,5), padding='same', 
-                                     activation=tf.nn.relu, 
-                                     kernel_initializer=initializer,
-                                     kernel_regularizer=tf.keras.regularizers.l2(1e-3))(inputs)
-#    x = tf.keras.layers.MaxPooling2D(2, 2)(x)
-#    x = tf.keras.layers.BatchNormalization()(x) 
-    x = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), padding='same', 
-                                     activation=tf.nn.relu, 
-                                     kernel_initializer=initializer,
-                                     kernel_regularizer=tf.keras.regularizers.l2(1e-3))(inputs)
-    x = tf.keras.layers.MaxPooling2D(2, 2)(x)
-    x = tf.keras.layers.BatchNormalization()(x)
+    # Add our layers on top
+    last_x = base_vgg19.layers[-1].output
     
     # Media side
     x_media = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', 
                                activation=tf.nn.relu, 
                                kernel_initializer=initializer,
-                               kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x_media = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', 
-                               activation=tf.nn.relu, 
-                               kernel_initializer=initializer,
-                               kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x_media = tf.keras.layers.MaxPooling2D(2, 2)(x_media)
-    x_media = tf.keras.layers.BatchNormalization()(x_media)
-    x_media = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', 
-                           activation=tf.nn.relu, 
-                           kernel_initializer=initializer,
-                           kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x_media = tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), padding='same',
-                               activation=tf.nn.relu, 
-                               kernel_initializer=initializer,
-                               kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x_media)
-    x_media = tf.keras.layers.MaxPooling2D(2, 2)(x_media)
-    x_media = tf.keras.layers.Flatten()(x_media)
-    x_media = tf.keras.layers.Dense(units=2048, 
-                                    kernel_regularizer=tf.keras.regularizers.l2(1e-3),
-                                    activation=tf.nn.relu)(x_media)
-    x_media = tf.keras.layers.Dropout(rate=0.6)(x_media)
+                               kernel_regularizer=tf.keras.regularizers.l2(1e-3))(last_x)
     x_media = tf.keras.layers.Dense(units=1024, 
                                     kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                     activation=tf.nn.relu)(x_media)
@@ -87,23 +59,7 @@ def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
     x_emotion = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', 
                                  activation=tf.nn.relu, 
                                  kernel_initializer=initializer,
-                                 kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x_emotion = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', 
-                                 activation=tf.nn.relu, 
-                                 kernel_initializer=initializer,
-                                 kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x)
-    x_emotion = tf.keras.layers.MaxPooling2D(2, 2)(x_emotion)
-    x_emotion = tf.keras.layers.BatchNormalization()(x_emotion)
-    x_emotion = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same',
-                                 activation=tf.nn.relu, 
-                                 kernel_initializer=initializer,
-                                 kernel_regularizer=tf.keras.regularizers.l2(1e-3))(x_emotion)
-    x_emotion = tf.keras.layers.MaxPooling2D(2, 2)(x_emotion)
-    x_emotion = tf.keras.layers.Flatten()(x_emotion)
-    x_emotion = tf.keras.layers.Dense(units=2048, 
-                                      kernel_regularizer=tf.keras.regularizers.l2(1e-3),
-                                      activation=tf.nn.relu)(x_emotion)
-    x_emotion = tf.keras.layers.Dropout(rate=0.6)(x_emotion)
+                                 kernel_regularizer=tf.keras.regularizers.l2(1e-3))(last_x)
     x_emotion = tf.keras.layers.Dense(units=1024, 
                                       kernel_regularizer=tf.keras.regularizers.l2(1e-3),
                                       activation=tf.nn.relu)(x_emotion)
