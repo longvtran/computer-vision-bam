@@ -12,6 +12,7 @@ import os
 from model7 import ConvNet
 from model_vgg19 import VGG19
 from model_mobile import MobileNet
+from model_nasnet import NASNet
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1,
           model_type="custom"):
@@ -26,6 +27,9 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     elif model_type == "mobile":
         print("Using pre-trained MobileNet model...")
         model=MobileNet()
+    elif model_type == "nasnet":
+        print("Using pre-trained NASNetMobile model...")
+        model=NASNet()
         
     # summarize layers
     # print(model.summary())
