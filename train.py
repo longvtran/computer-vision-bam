@@ -9,7 +9,7 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model8 import ConvNet
+from model7 import ConvNet
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1):
     x, y_media, y_emotion = train_dset
