@@ -11,6 +11,7 @@ import tensorflow as tf
 import os
 from model7 import ConvNet
 from model_vgg19 import VGG19
+from model_mobile import MobileNet
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1,
           model_type="custom"):
@@ -22,6 +23,9 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     elif model_type == "vgg19":
         print("Using pre-trained VGG19 model...")
         model=VGG19()
+    elif model_type == "mobile":
+        print("Using pre-trained MobileNet model...")
+        model=MobileNet()
         
     # summarize layers
     # print(model.summary())

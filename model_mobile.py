@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Mon Jun  4 03:36:48 2018
+
+@author: longtran
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Sun Jun  3 20:38:44 2018
 
 @author: longtran
@@ -8,7 +16,7 @@ Created on Sun Jun  3 20:38:44 2018
 
 import tensorflow as tf
 
-def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
+def MobileNet(num_classes_media=7, num_classes_emotion=4, training=False):
     """
     Build a convolutional network using Keras Functional API. This network reads
     the image image arrays as input and produces two prediction outputs on the
@@ -30,16 +38,16 @@ def VGG19(num_classes_media=7, num_classes_emotion=4, training=False):
     inputs = tf.keras.layers.Input(shape=(128,128,3))
     
     # get the base VGG19 model
-    base_vgg19 = tf.keras.applications.vgg19.VGG19(include_top=False,
+    base_mobile = tf.keras.applications.mobilenet.MobileNet(include_top=False,
                                                    input_tensor=inputs,
                                                    input_shape=(128,128,3))
     
     # Freeze all except the last five layers of VGG19 (4 conv and 1 pooling layer)
-    for layer in base_vgg19.layers[:-5]:
+    for layer in base_mobile.layers[:-5]:
         layer.trainable = False
     
     # Add our layers on top
-    last_x = base_vgg19.layers[-1].output
+    last_x = base_mobile.layers[-1].output
     
     # Media side
     x_media = tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', 
