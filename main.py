@@ -115,6 +115,7 @@ def main():
         
     elif options.mode == "train_vgg":
         # Load the VGG19 model, add a few layers on top
+        pass
     
     elif options.mode == "test":
         # TO BE IMPLEMENTED
