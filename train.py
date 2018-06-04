@@ -11,17 +11,7 @@ import tensorflow as tf
 import os
 from model8 import ConvNet
 
-def gen_generator(generator, X, y_media, y_emotion, batch_size, num_classes_media=7):
-    combine_labels = np.concatenate((y_media, y_emotion), axis=1) 
-    generator = generator.flow(X, combine_labels, batch_size=batch_size)
-    while True:
-        X_batch, combine_labels_batch =  generator.next()
-        y_media_batch = combine_labels_batch[:, :num_classes_media]
-        y_emotion_batch = combine_labels_batch[:, num_classes_media:]
-        yield (X_batch, {'output_media': y_media_batch, 'output_emotion': y_emotion_batch})
-
-def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='/cpu:0', 
-          batch_size=64, num_epochs=1):
+def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1):
     x, y_media, y_emotion = train_dset
     x_val, y_media_val, y_emotion_val = val_dset
     model = ConvNet()
@@ -66,10 +56,9 @@ def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='
                                               period=1)    
     
     # Train the model
-    model.fit_generator(gen_generator(train_datagen, x, y_media, y_emotion, batch_size=batch_size),
-               epochs=num_epochs, steps_per_epoch= np.ceil(len(x) / batch_size),
-               validation_data=gen_generator(val_datagen, x_val, y_media_val, y_emotion_val, batch_size=batch_size),
-               validation_steps = np.ceil(len(x_val) / batch_size),
+    model.fit(x, {'output_media': y_media, 'output_emotion': y_emotion},
+               epochs=num_epochs, batch_size=batch_size,
+               validation_data=(x_val, [y_media_val, y_emotion_val]),
                callbacks=[csv_logger, tsb_logger, media_ckpt, emotion_ckpt])
     
     # Save the final model

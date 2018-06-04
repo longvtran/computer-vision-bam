@@ -62,25 +62,24 @@ def load_data(data_dir, input_file, media_label_file, emotion_label_file):
     
     return train_data, val_data, test_data
     
-def preprocess(train_data, augment=False):   
-    X_train = train_data[0]
+def preprocess(train_data, val_data, test_data, augment=False):   
+    X_train, y_media_train, y_emotion_train = train_data
+    X_val, y_media_val, y_emotion_val = val_data
+    X_test, y_media_test, y_emotion_test = test_data
     if augment:
-        print("Images are augmented...")
-        train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
-                                                                        featurewise_std_normalization=True,
-                                                                        zca_whitening=False,
-                                                                        shear_range=0.2,
-                                                                        zoom_range=0.0,
-                                                                        horizontal_flip=False,
-                                                                        vertical_flip=True)
+        # to be implemented
+        pass
     else:
-        print("Images are only centered and normalized...")
-        train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
-                                                                        featurewise_std_normalization=True)
+        # Normalize the data: subtract the mean pixel and divide by std
+        mean_pixel = X_train.mean(axis=(0, 1, 2), keepdims=True)
+        std_pixel = X_train.std(axis=(0, 1, 2), keepdims=True)
+        X_train = (X_train - mean_pixel) / std_pixel
+        X_val = (X_val - mean_pixel) / std_pixel
+        X_test = (X_test - mean_pixel) / std_pixel
     
-    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
-                                                                        featurewise_std_normalization=True)
+    # Return tuples of train, dev, test
+    train_dset = (X_train, y_media_train, y_emotion_train)
+    val_dset = (X_val, y_media_val, y_emotion_val)
+    test_dset = (X_test, y_media_test, y_emotion_test)
     
-    train_datagen.fit(X_train)
-    val_datagen.fit(X_train)
-    return train_datagen, val_datagen
+    return train_dset, val_dset, test_dset
