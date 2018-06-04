@@ -1,4 +1,3 @@
-import pdb
 import tensorflow as tf
 from model6 import ConvNet
 
@@ -138,7 +137,6 @@ class OurModelBad():
             self.model = tf.keras.models.load_model(save_path)
 
     def extract_features(self, input_image=None):
-        pdb.set_trace()
         if input_image is None:
             input_image = self.model.input
         layers = []
