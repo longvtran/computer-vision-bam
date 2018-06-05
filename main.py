@@ -16,6 +16,7 @@ from argparse import ArgumentParser
 from data_utils import split_data, load_data, DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
 from preprocessing import load_data, preprocess
 from train import train
+from evaluate import evaluate_test
 
 def build_parser():
     parser = ArgumentParser()
@@ -44,14 +45,18 @@ def build_parser():
                         help="flag to specify if images should be augmented)",
                         action='store_false')
     parser.set_defaults(augment_data=False)
-    # Model type to train
+    # Model type
     parser.add_argument("--model_type", dest="model_type",
-                        help="flag to specify which model to train: custom, or vgg19",
+                        help="flag to specify which model to train/test: custom, vgg19, vgg16, mobile, xception",
                         default="custom")
     parser.add_argument("--device", dest="device", default="cpu",
                         help="device to be used to train")
     parser.add_argument("--log_folder", dest="log_folder",
                         help="log folder to save log files from training")
+    # Model name to test (copy the models to be tested to the test_models folder)
+    parser.add_argument("--model_name", dest="model_name",
+                        help="flag to specify the name of the model to test")
+    
     return parser
 
 def main():
@@ -118,8 +123,22 @@ def main():
               batch_size=64, num_epochs=100, model_type=options.model_type)
     
     elif options.mode == "test":
-        # TO BE IMPLEMENTED
-        pass
+        # Load the data and organize into three tuples (train, val/dev, test)
+        # Each tuple consists of input arrays, media labels, and emotion labels
+        train_data, val_data, test_data = load_data(DATA_DIR, INPUT_FILE, 
+                                                     MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
+        # Preprocess the data
+        train_dset, val_dset, test_dset = preprocess(train_data, val_data, test_data, 
+                                                     augment=options.augment)
+        # Specify the device:
+        if options.device == "cpu":
+            device = "/cpu:0"
+        elif options.device == "gpu":
+            device = "/device:GPU:0"
+            
+        # Load the model
+        model_path = os.path.join("test_models", options.model_name)
+        evaluate_test(model_path, options.model_type, test_dset, batch_size=64)
 
 if __name__ == "__main__":
     main()
