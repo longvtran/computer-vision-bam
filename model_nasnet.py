@@ -39,6 +39,7 @@ def NASNet(num_classes_media=7, num_classes_emotion=4, training=False):
     
     # get the base VGG19 model
     base_nasnet = tf.keras.applications.NASNetMobile(include_top=False,
+                                                     weights='imagenet'
                                                    input_tensor=inputs,
                                                    input_shape=(128,128,3))
     
