@@ -44,7 +44,7 @@ def build_parser():
     parser.add_argument("--no-augment", dest="augment",
                         help="flag to specify if images should be augmented)",
                         action='store_false')
-    parser.set_defaults(augment_data=False)
+    parser.set_defaults(augment=False)
     # Model type
     parser.add_argument("--model_type", dest="model_type",
                         help="flag to specify which model to train/test: custom, vgg19, vgg16, mobile, xception",
@@ -56,6 +56,14 @@ def build_parser():
     # Model name to test (copy the models to be tested to the test_models folder)
     parser.add_argument("--model_name", dest="model_name",
                         help="flag to specify the name of the model to test")
+    # Confusion matrix option defaults to False
+    parser.add_argument("--confusion_mat", dest="confusion_mat",
+                        help="flag to specify if images should be augmented)",
+                        action='store_true')
+    parser.add_argument("--no-confusion_mat", dest="confusion_mat",
+                        help="flag to specify if images should be augmented)",
+                        action='store_false')
+    parser.set_defaults(confusion_mat=False)
     
     return parser
 
@@ -138,7 +146,9 @@ def main():
             
         # Load the model
         model_path = os.path.join("test_models", options.model_name)
-        evaluate_test(model_path, options.model_type, test_dset, batch_size=64)
+        evaluate_test(model_path, options.model_type, test_dset, batch_size=64, 
+                      confusion_mat=options.confusion_mat)
+        
 
 if __name__ == "__main__":
     main()
