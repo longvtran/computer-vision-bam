@@ -36,6 +36,10 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
         from model_densenet import DenseNet
         print("Using pre-trained DenseNetMobile model...")
         model=DenseNet()
+    elif model_type == "xception":
+        from model_xception import Xception
+        print("Using pre-trained Xception model...")
+        model=Xception()
         
     # summarize layers
     # print(model.summary())
