@@ -23,23 +23,27 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
     elif model_type == "vgg19":
         from model_vgg19 import VGG19
         print("Using pre-trained VGG19 model...")
-        model=VGG19()
+        model = VGG19()
+    elif model_type == "vgg16":
+        from model_vgg16 import VGG16
+        print("Using pre-trained VGG16 model...")
+        model = VGG16()
     elif model_type == "mobile":
         from model_mobile import MobileNet
         print("Using pre-trained MobileNet model...")
-        model=MobileNet()
+        model = MobileNet()
     elif model_type == "nasnet":
         from model_nasnet import NASNet
         print("Using pre-trained NASNetMobile model...")
-        model=NASNet()
-    elif model_type == "densenet":
-        from model_densenet import DenseNet
-        print("Using pre-trained DenseNetMobile model...")
-        model=DenseNet()
+        model = NASNet()
+#    elif model_type == "densenet":
+#        from model_densenet import DenseNet
+#        print("Using pre-trained DenseNetMobile model...")
+#        model=DenseNet()
     elif model_type == "xception":
         from model_xception import Xception
         print("Using pre-trained Xception model...")
-        model=Xception()
+        model = Xception()
         
     # summarize layers
     # print(model.summary())

@@ -37,12 +37,12 @@ def MobileNet(num_classes_media=7, num_classes_emotion=4, training=False):
     
     inputs = tf.keras.layers.Input(shape=(128,128,3))
     
-    # get the base VGG19 model
+    # get the base MobileNet model
     base_mobile = tf.keras.applications.mobilenet.MobileNet(include_top=False,
                                                    input_tensor=inputs,
                                                    input_shape=(128,128,3))
     
-    # Freeze all except the last five layers of VGG19 (4 conv and 1 pooling layer)
+    # Freeze all except the last five layers of MobileNet (4 conv and 1 pooling layer)
     for layer in base_mobile.layers[:-5]:
         layer.trainable = False
     
