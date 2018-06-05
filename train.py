@@ -10,9 +10,8 @@ import numpy as np
 import tensorflow as tf
 import os
 from model7 import ConvNet
-from model_vgg19 import VGG19
-from model_mobile import MobileNet
-from model_nasnet import NASNet
+
+
 
 def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1,
           model_type="custom"):
@@ -22,14 +21,21 @@ def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_
         print("Using custom model...")
         model = ConvNet()
     elif model_type == "vgg19":
+        from model_vgg19 import VGG19
         print("Using pre-trained VGG19 model...")
         model=VGG19()
     elif model_type == "mobile":
+        from model_mobile import MobileNet
         print("Using pre-trained MobileNet model...")
         model=MobileNet()
     elif model_type == "nasnet":
+        from model_nasnet import NASNet
         print("Using pre-trained NASNetMobile model...")
         model=NASNet()
+    elif model_type == "densenet":
+        from model_densenet import DenseNet
+        print("Using pre-trained DenseNetMobile model...")
+        model=DenseNet()
         
     # summarize layers
     # print(model.summary())
