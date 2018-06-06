@@ -9,23 +9,42 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model8 import ConvNet
+from model6 import ConvNet
 
-def gen_generator(generator, X, y_media, y_emotion, batch_size, num_classes_media=7):
-    combine_labels = np.concatenate((y_media, y_emotion), axis=1) 
-    generator = generator.flow(X, combine_labels, batch_size=batch_size)
-    while True:
-        X_batch, combine_labels_batch =  generator.next()
-        y_media_batch = combine_labels_batch[:, :num_classes_media]
-        y_emotion_batch = combine_labels_batch[:, num_classes_media:]
-        yield (X_batch, {'output_media': y_media_batch, 'output_emotion': y_emotion_batch})
 
-def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='/cpu:0', 
-          batch_size=64, num_epochs=1):
+
+def train(train_dset, val_dset, log_folder, device='/cpu:0', batch_size=64, num_epochs=1,
+          model_type="custom"):
     x, y_media, y_emotion = train_dset
     x_val, y_media_val, y_emotion_val = val_dset
-    model = ConvNet()
-    
+    if model_type == "custom":
+        print("Using custom model...")
+        model = ConvNet()
+    elif model_type == "vgg19":
+        from model_vgg19 import VGG19
+        print("Using pre-trained VGG19 model...")
+        model = VGG19()
+    elif model_type == "vgg16":
+        from model_vgg16 import VGG16
+        print("Using pre-trained VGG16 model...")
+        model = VGG16()
+    elif model_type == "mobile":
+        from model_mobile import MobileNet
+        print("Using pre-trained MobileNet model...")
+        model = MobileNet()
+    elif model_type == "nasnet":
+        from model_nasnet import NASNet
+        print("Using pre-trained NASNetMobile model...")
+        model = NASNet()
+#    elif model_type == "densenet":
+#        from model_densenet import DenseNet
+#        print("Using pre-trained DenseNetMobile model...")
+#        model=DenseNet()
+    elif model_type == "xception":
+        from model_xception import Xception
+        print("Using pre-trained Xception model...")
+        model = Xception()
+        
     # summarize layers
     # print(model.summary())
     
@@ -34,7 +53,7 @@ def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='
     model.compile(optimizer=optimizer, 
                   loss={'output_media': 'categorical_crossentropy', 
                         'output_emotion': 'categorical_crossentropy'},
-                  loss_weights={'output_media': 1., 'output_emotion': 1.},
+                  loss_weights={'output_media': 1, 'output_emotion': 1.},
                   metrics=['accuracy'])
     
     # Save training results to a log file
@@ -66,10 +85,9 @@ def train(train_dset, val_dset, train_datagen, val_datagen, log_folder, device='
                                               period=1)    
     
     # Train the model
-    model.fit_generator(gen_generator(train_datagen, x, y_media, y_emotion, batch_size=batch_size),
-               epochs=num_epochs, steps_per_epoch= np.ceil(len(x) / batch_size),
-               validation_data=gen_generator(val_datagen, x_val, y_media_val, y_emotion_val, batch_size=batch_size),
-               validation_steps = np.ceil(len(x_val) / batch_size),
+    model.fit(x, {'output_media': y_media, 'output_emotion': y_emotion},
+               epochs=num_epochs, batch_size=batch_size,
+               validation_data=(x_val, [y_media_val, y_emotion_val]),
                callbacks=[csv_logger, tsb_logger, media_ckpt, emotion_ckpt])
     
     # Save the final model
