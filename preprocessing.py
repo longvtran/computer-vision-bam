@@ -105,3 +105,15 @@ def preprocess_from_file(train_stats_file, test_data, augment=False):
     test_dset = (X_test, y_media_test, y_emotion_test)
     
     return test_dset
+
+def preprocess_image(train_stats_file, x_test, augment=False):   
+    train_stats = np.load(os.path.join(train_stats_file))
+    if augment:
+        # to be implemented
+        pass
+    else:
+        mean_pixel = train_stats['mean_pixel']
+        std_pixel = train_stats['std_pixel']
+        x_test = (x_test - mean_pixel) / std_pixel
+    
+    return x_test

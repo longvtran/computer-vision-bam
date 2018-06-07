@@ -198,6 +198,12 @@ def load_data(update=False, remove_broken=False):
 
     return X, y_media, y_emotion
 
+def load_image(img_path):
+    img = imread(img_path)
+    img = imresize(img, IMG_SIZE)
+    return np.expand_dims(img, axis=0)
+    
+
 if __name__ == "__main__":
     # Split the data into train/dev/test sets
     split_data()

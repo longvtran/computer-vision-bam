@@ -69,48 +69,24 @@ def load_ensemble(ensemble_folder):
             i += 1
     return models
 
-def evaluate_ensemble(ensemble_folder, test_dset, batch_size=64, confusion_mat=False,
-                      mixed_ensemble=False):
+def evaluate_ensemble(ensemble_folder, test_dset, batch_size=64, confusion_mat=False):
     print("Evaluate ensemble...")
     x_test, y_media_test, y_emotion_test = test_dset
+            
+    # Load the models from the ensemble folder
+    models = load_ensemble(ensemble_folder)
+    ensemble_y_media_pred = np.zeros_like(y_media_test)
+    ensemble_y_emotion_pred = np.zeros_like(y_emotion_test)
     
-    if mixed_ensemble:
-        # Load media models from the ensemble directory
-        media_models = load_ensemble(os.path.join(ensemble_folder), "media_models")
-        emotion_models = load_ensemble(os.path.join(ensemble_folder), "emotion_models")
-        
-        ensemble_y_media_pred = np.zeros_like(y_media_test)
-        ensemble_y_emotion_pred = np.zeros_like(y_emotion_test)
-        
-        for model in media_models:
-            print("Calculating predictions from model", model)
-            y_media_pred, y_emotion_pred = media_models[0].predict(x_test, batch_size=batch_size)
-            ensemble_y_media_pred += y_media_pred
-        
-        for model in emotion_models:
-            print("Calculating predictions from model", model)
-            y_media_pred, y_emotion_pred = emotion_models[0].predict(x_test, batch_size=batch_size)
-            ensemble_y_emotion_pred += y_emotion_pred
-        
-        # Take the average
-        ensemble_y_media_pred /= len(media_models)
-        ensemble_y_emotion_pred /= len(emotion_models)
-        
-    else:
-        # Load the models from the ensemble folder
-        models = load_ensemble(ensemble_folder)
-        ensemble_y_media_pred = np.zeros_like(y_media_test)
-        ensemble_y_emotion_pred = np.zeros_like(y_emotion_test)
-        
-        for model in models:
-            print("Calculating predictions from model", model)
-            y_media_pred, y_emotion_pred = models[0].predict(x_test, batch_size=batch_size)
-            ensemble_y_media_pred += y_media_pred
-            ensemble_y_emotion_pred += y_emotion_pred
-        
-        # Take the average
-        ensemble_y_media_pred /= len(models)
-        ensemble_y_emotion_pred /= len(models)
+    for model in models:
+        print("Calculating predictions from model", model)
+        y_media_pred, y_emotion_pred = models[0].predict(x_test, batch_size=batch_size)
+        ensemble_y_media_pred += y_media_pred
+        ensemble_y_emotion_pred += y_emotion_pred
+    
+    # Take the average
+    ensemble_y_media_pred /= len(models)
+    ensemble_y_emotion_pred /= len(models)
     
     # Get the predictions and ground truth outputs
     y_media_test_label = np.argmax(y_media_test, axis=1)
@@ -135,3 +111,15 @@ def evaluate_ensemble(ensemble_folder, test_dset, batch_size=64, confusion_mat=F
         print(cm_media)
         print("Confusion matrix for emotion:")
         print(cm_emotion)
+
+def predict_image(x_test, model_path):
+    model = tf.keras.models.load_model(model_path)
+    y_media_pred, y_emotion_pred = model.predict(x_test)
+    y_media_pred_label = np.argmax(y_media_pred, axis=1)
+    y_emotion_pred_label = np.argmax(y_emotion_pred, axis=1)
+    
+    print("Media prediction:", y_media_pred_label)
+    print("Emotion prediction:", y_emotion_pred_label)
+    
+    
+    

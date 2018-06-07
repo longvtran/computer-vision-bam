@@ -13,10 +13,10 @@ import time
 import os
 import numpy as np
 from argparse import ArgumentParser
-from data_utils import split_data, load_data, DATA_DIR, TRAIN_STATS_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
-from preprocessing import load_data, preprocess, preprocess_from_file
+from data_utils import split_data, load_data, load_image, DATA_DIR, TRAIN_STATS_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
+from preprocessing import load_data, preprocess, preprocess_from_file, preprocess_image
 from train import train
-from evaluate import evaluate_test, evaluate_ensemble
+from evaluate import evaluate_test, evaluate_ensemble, predict_image
 
 
 def build_parser():
@@ -68,15 +68,9 @@ def build_parser():
     # Where to find the ensemble folder that stores test models
     parser.add_argument("--ensemble_folder", dest="ensemble_folder",
                         help="ensemble folder where models in the ensemble are stored")
-    # Mixed ensemble option (using media model ensemble to make media predictions, 
-    # and emotion model ensemble to make emotion predictions). The option defaults to False
-    parser.add_argument("--mixed", dest="mixed",
-                        help="flag to specify if mixed ensemble should be used)",
-                        action='store_true')
-    parser.add_argument("--no-mixed", dest="mixed",
-                        help="flag to specify if mixed ensemble should be used)",
-                        action='store_false')
-    parser.set_defaults(mixed=False)
+    # Image name to test
+    parser.add_argument("--image", dest="image",
+                        help="flag to specify the name of the image to test")
     
     return parser
 
@@ -199,8 +193,15 @@ def main():
         
         # Evaluate the ensemble
         evaluate_ensemble(options.ensemble_folder, test_dset, batch_size=64, 
-                          confusion_mat=options.confusion_mat,
-                          mixed_ensemble=options.mixed)    
+                          confusion_mat=options.confusion_mat) 
+    
+    elif options.mode == "test_single":
+        x_test = load_image(os.path.join('stylized_images_configs', options.image))
+        train_stats_file = os.path.join(TRAIN_STATS_DIR, "train_stats.npz")
+        x_test = preprocess_image(train_stats_file, x_test, augment=options.augment)
+        
+        model_path = os.path.join("test_models", options.model_name)
+        predict_image(x_test, model_path)
 
 
 if __name__ == "__main__":
