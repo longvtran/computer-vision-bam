@@ -13,13 +13,16 @@ from style_config import StyleConfig
 
 TEST_DIR = "tests/"
 
-# Our model input image size
-IMG_SIZE = (128, 128)
-
 # Constants to normalize images for style transfer with squeezenet
 SQUEEZENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 SQUEEZENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
+# Our model input image size
+IMG_SIZE = (128, 128)
+
+# Constants to normalize images for style transfer with our models
+BAM_MEAN = 131.5598075494837
+BAM_STD = 81.77253959615437
 
 def our_load_image(filename):
     """
@@ -30,6 +33,9 @@ def our_load_image(filename):
     img = imresize(img, IMG_SIZE)
     img = np.expand_dims(img, axis=0)
     return img
+
+def our_preprocess(img):
+    return (img.astype(np.float32) - BAM_MEAN) / BAM_STD
 
 def squeezenet_load(filename, size=None):
     """

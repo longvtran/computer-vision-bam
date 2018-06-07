@@ -9,6 +9,8 @@ SEED = 231
 
 # H x W that the images should be reshaped to
 IMG_SIZE = (128, 128)
+BAM_MEAN = 131.5598075494837
+BAM_STD = 81.77253959615437
 
 # Directory where the media/emotion subdirectories are located
 DATA_DIR = "data/"
@@ -176,7 +178,7 @@ def load_data(update=False, remove_broken=False):
     seed = SEED
     np.random.seed(seed)
     for set_type in ["train", "dev", "test"]:
-        X[set_type] = np.concatenate(X[set_type], axis=0)
+        X[set_type] = np.concatenate(X[set_type], axis=0).astype('float32')
         y_media[set_type] = np.concatenate(y_media[set_type], axis=0)
         y_emotion[set_type] = np.concatenate(y_emotion[set_type], axis=0)
 
@@ -184,6 +186,17 @@ def load_data(update=False, remove_broken=False):
         X[set_type] = X[set_type][order]
         y_media[set_type] = y_media[set_type][order]
         y_emotion[set_type] = y_emotion[set_type][order]
+
+    print("Preprocessing data")
+    mean_pixel = BAM_MEAN #np.mean(X["train"])
+    std_pixel = BAM_STD #np.std(X["train"])
+    print(f'\ttrain mean: {mean_pixel}')
+    print(f'\ttrain std: {std_pixel}')
+
+    # TODO: cast everything as float32 for operation
+    for set_type in ["train", "dev", "test"]:
+        X[set_type] -= mean_pixel
+        X[set_type] /= std_pixel
 
     # Save each dictionary as an npz file
     print("Completed loading all data")

@@ -66,16 +66,20 @@ def preprocess(train_data, val_data, test_data, augment=False):
     X_train, y_media_train, y_emotion_train = train_data
     X_val, y_media_val, y_emotion_val = val_data
     X_test, y_media_test, y_emotion_test = test_data
+    print('Preprocessing data')
     if augment:
         # to be implemented
         pass
     else:
         # Normalize the data: subtract the mean pixel and divide by std
-        mean_pixel = X_train.mean(axis=(0, 1, 2), keepdims=True)
-        std_pixel = X_train.std(axis=(0, 1, 2), keepdims=True)
+        mean_pixel = X_train.mean(axis=(0, 1, 2), keepdims=False)
+        std_pixel = X_train.std(axis=(0, 1, 2), keepdims=False)
         X_train = (X_train - mean_pixel) / std_pixel
         X_val = (X_val - mean_pixel) / std_pixel
         X_test = (X_test - mean_pixel) / std_pixel
+        print('Preprocessing complete')
+        print(f'\ttrain mean: {mean_pixel}')
+        print(f'\ttrain std: {std_pixel}')
     
     # Return tuples of train, dev, test
     train_dset = (X_train, y_media_train, y_emotion_train)

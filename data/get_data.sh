@@ -4,10 +4,10 @@
 # media/emotion and store them in folders by their attributes.
 
 # number of each combination of lables to store (results in total of 28 * num_images)
-num_images=500
+num_images=5000
 
 # wait time in seconds between each image downloaded (set to 1 if getting errors)
-wait_time=0
+wait_time=1
 
 Media=(
     media_3d_graphics

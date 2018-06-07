@@ -9,7 +9,7 @@ Created on Sun May 13 02:31:23 2018
 import numpy as np
 import tensorflow as tf
 import os
-from model6 import ConvNet
+from model7 import ConvNet
 
 
 

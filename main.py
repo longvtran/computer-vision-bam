@@ -113,18 +113,20 @@ def main():
         
         # Load the data and organize into three tuples (train, val/dev, test)
         # Each tuple consists of input arrays, media labels, and emotion labels
-        train_data, val_data, test_data = load_data(DATA_DIR, INPUT_FILE, 
+        train_dset, val_dset, test_dset = load_data(DATA_DIR, INPUT_FILE, 
                                                      MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
         
         # Preprocess the data
-        train_dset, val_dset, test_dset = preprocess(train_data, val_data, test_data, 
-                                                     augment=options.augment)
+        #train_dset, val_dset, test_dset = preprocess(train_data, val_data, test_data, 
+                                                     #augment=options.augment)
         
         # Specify the device:
         if options.device == "cpu":
             device = "/cpu:0"
+            print("Selected CPU")
         elif options.device == "gpu":
             device = "/device:GPU:0"
+            print("Selected GPU")
         
         # Train the model
         train(train_dset, val_dset, log_folder=log_folder, device=device, 
