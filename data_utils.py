@@ -12,6 +12,8 @@ IMG_SIZE = (128, 128)
 
 # Directory where the media/emotion subdirectories are located
 DATA_DIR = "data/"
+# Director where the mean and std of train set are saved
+TRAIN_STATS_DIR = "train_stats"
 # SQLite file needs to go at "data/bam.sqlite"
 BAM = "bam.sqlite"
 # Names for the saved numpy arrays that include the reshaped and formated data

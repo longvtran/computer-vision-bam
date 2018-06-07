@@ -62,7 +62,7 @@ def load_data(data_dir, input_file, media_label_file, emotion_label_file):
     
     return train_data, val_data, test_data
     
-def preprocess(train_data, val_data, test_data, augment=False):   
+def preprocess(train_data, val_data, test_data, train_stats_dir, augment=False):   
     X_train, y_media_train, y_emotion_train = train_data
     X_val, y_media_val, y_emotion_val = val_data
     X_test, y_media_test, y_emotion_test = test_data
@@ -76,6 +76,12 @@ def preprocess(train_data, val_data, test_data, augment=False):
         X_train = (X_train - mean_pixel) / std_pixel
         X_val = (X_val - mean_pixel) / std_pixel
         X_test = (X_test - mean_pixel) / std_pixel
+        
+        if not os.path.exists(train_stats_dir):
+            os.makedirs(train_stats_dir)
+        np.savez(os.path.join(train_stats_dir, "train_stats.npz"), 
+                 mean_pixel=mean_pixel,
+                 std_pixel=std_pixel)
     
     # Return tuples of train, dev, test
     train_dset = (X_train, y_media_train, y_emotion_train)
@@ -83,3 +89,19 @@ def preprocess(train_data, val_data, test_data, augment=False):
     test_dset = (X_test, y_media_test, y_emotion_test)
     
     return train_dset, val_dset, test_dset
+
+def preprocess_from_file(train_stats_file, test_data, augment=False):   
+    train_stats = np.load(os.path.join(train_stats_file))
+    X_test, y_media_test, y_emotion_test = test_data
+    if augment:
+        # to be implemented
+        pass
+    else:
+        mean_pixel = train_stats['mean_pixel']
+        std_pixel = train_stats['std_pixel']
+        X_test = (X_test - mean_pixel) / std_pixel
+    
+    # Return tuple of test
+    test_dset = (X_test, y_media_test, y_emotion_test)
+    
+    return test_dset
