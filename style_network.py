@@ -194,14 +194,14 @@ if __name__ == "__main__":
     # Select a model
     model_type = "ours"
     #model_type = "squeezenet"
-    model_path = 'weights/model6_best.h5'
+    model_path = 'weights/media_ckpt_best.h5'
     #weight_path = "weights/squeezenet.ckpt"
 
     # Select content and style images
     #content_image = "data/train/media_oilpaint/emotion_peaceful/20164695.jpg"
     content_image = "styles/tubingen.jpg"
-    style_image = "data/train/media_oilpaint/emotion_scary/42142915.jpg"
-    #style_image = "styles/composition_vii.jpg"
+    #style_image = "data/train/media_oilpaint/emotion_scary/42142915.jpg"
+    style_image = "styles/composition_vii.jpg"
 
     # Test loop
     for i in range(num_tests):
