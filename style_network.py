@@ -4,12 +4,10 @@ import tensorflow as tf
 from scipy.misc import imread, imresize, imsave
 
 from data_utils import DATA_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
-from preprocessing import load_data
-from preprocessing import preprocess as our_preprocess
 from squeezenet import SqueezeNet
 #from model6 import ConvNet
 from ourmodel import OurModel
-from style_config import StyleConfig
+from style_config import OurStyleConfig, SqueezeStyleConfig
 
 TEST_DIR = "tests/"
 
@@ -35,7 +33,7 @@ def our_load_image(filename):
     return img
 
 def our_preprocess(img):
-    return (img.astype(np.float32) - BAM_MEAN) / BAM_STD
+    return (img.squeeze().astype(np.float32) - BAM_MEAN) / BAM_STD
 
 def squeezenet_load(filename, size=None):
     """
@@ -125,13 +123,7 @@ class StyleNetwork:
 
         # Extract features from the content image
         if self.model_type == "ours":
-            train_data, _a, _b = load_data(DATA_DIR, INPUT_FILE, 
-                                           MEDIA_LABEL_FILE,
-                                           EMOTION_LABEL_FILE)
-            _, val_datagen = our_preprocess(train_data)
-            content_img = val_datagen.flow(our_load_image(content_image),
-                                           batch_size=1)
-            content_img = np.squeeze(content_img[0])
+            content_img = our_preprocess(our_load_image(content_image))
         elif self.model_type == "squeezenet":
             content_img = squeezenet_preprocess(squeezenet_load(content_image,
                                                                 self.config.val["image_size"]))
@@ -141,9 +133,7 @@ class StyleNetwork:
 
         # Extract features from the style image
         if self.model_type == "ours":
-            style_img = val_datagen.flow(our_load_image(style_image),
-                                         batch_size=1)
-            style_img = np.squeeze(style_img[0])
+            style_img = our_preprocess(our_load_image(style_image))
         elif self.model_type == "squeezenet":
             style_img = squeezenet_preprocess(squeezenet_load(style_image,
                                                               self.config.val["style_size"]))
@@ -198,19 +188,20 @@ if __name__ == "__main__":
     test_folder = TEST_DIR
 
     # Load a configuration file to use
-    config = StyleConfig()
+    config = OurStyleConfig()
+    #config = SqueezeStyleConfig()
 
     # Select a model
-    #model_type = "ours"
-    model_type = "squeezenet"
-    #model_path = 'weights/media_ckpt_best.h5'
-    weight_path = "weights/squeezenet.ckpt"
+    model_type = "ours"
+    #model_type = "squeezenet"
+    model_path = 'weights/model6_best.h5'
+    #weight_path = "weights/squeezenet.ckpt"
 
     # Select content and style images
     #content_image = "data/train/media_oilpaint/emotion_peaceful/20164695.jpg"
     content_image = "styles/tubingen.jpg"
-    #style_image = "data/train/media_oilpaint/emotion_scary/42142915.jpg"
-    style_image = "styles/composition_vii.jpg"
+    style_image = "data/train/media_oilpaint/emotion_scary/42142915.jpg"
+    #style_image = "styles/composition_vii.jpg"
 
     # Test loop
     for i in range(num_tests):
@@ -221,8 +212,8 @@ if __name__ == "__main__":
 
         # Load the model and do the style transfer
         with tf.Session() as sess:
-            #model = OurModel(save_path=model_path, sess=sess)
-            model = SqueezeNet(save_path=weight_path, sess=sess)
+            model = OurModel(save_path=model_path, sess=sess)
+            #model = SqueezeNet(save_path=weight_path, sess=sess)
             style_transfer = StyleNetwork(config, model, model_type)
             style_transfer.transfer(content_image, style_image, test_folder)
 
