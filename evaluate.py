@@ -10,10 +10,8 @@ import numpy as np
 import tensorflow as tf
 import sklearn.metrics
 import sys
-<<<<<<< HEAD
 import os
-=======
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233
+
 
 def convert_to_one_hot(preds):
     class_preds = np.argmax(preds, axis=1)
@@ -47,7 +45,6 @@ def evaluate_test(model_path, model_type, test_dset, batch_size=64, confusion_ma
         y_media_pred_label = np.argmax(y_media_pred, axis=1)
         y_emotion_pred_label = np.argmax(y_emotion_pred, axis=1)
         
-<<<<<<< HEAD
         cm_media = sklearn.metrics.confusion_matrix(y_media_test_label, y_media_pred_label)
         cm_emotion = sklearn.metrics.confusion_matrix(y_emotion_test_label, y_emotion_pred_label)
         print("Confusion matrix for media:")
@@ -131,19 +128,10 @@ def evaluate_ensemble(ensemble_folder, test_dset, batch_size=64, confusion_mat=F
     if confusion_mat:
         cm_media = sklearn.metrics.confusion_matrix(y_media_test_label, ensemble_y_media_pred_label)
         cm_emotion = sklearn.metrics.confusion_matrix(y_emotion_test_label, ensemble_y_emotion_pred_label)
-=======
-        
-        
-        cm_media = sklearn.metrics.confusion_matrix(y_media_test_label, y_media_pred_label)
-        cm_emotion = sklearn.metrics.confusion_matrix(y_emotion_test_label, y_emotion_pred_label)
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233
+                
+        cm_media = sklearn.metrics.confusion_matrix(y_media_test_label, ensemble_y_media_pred_label)
+        cm_emotion = sklearn.metrics.confusion_matrix(y_emotion_test_label, ensemble_y_emotion_pred_label)
         print("Confusion matrix for media:")
         print(cm_media)
         print("Confusion matrix for emotion:")
         print(cm_emotion)
-<<<<<<< HEAD
-
-        
-=======
-    
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233

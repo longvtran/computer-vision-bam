@@ -16,11 +16,8 @@ from argparse import ArgumentParser
 from data_utils import split_data, load_data, DATA_DIR, TRAIN_STATS_DIR, INPUT_FILE, MEDIA_LABEL_FILE, EMOTION_LABEL_FILE
 from preprocessing import load_data, preprocess, preprocess_from_file
 from train import train
-<<<<<<< HEAD
 from evaluate import evaluate_test, evaluate_ensemble
-=======
-from evaluate import evaluate_test
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233
+
 
 def build_parser():
     parser = ArgumentParser()
@@ -68,7 +65,6 @@ def build_parser():
                         help="flag to specify if images should be augmented)",
                         action='store_false')
     parser.set_defaults(confusion_mat=False)
-<<<<<<< HEAD
     # Where to find the ensemble folder that stores test models
     parser.add_argument("--ensemble_folder", dest="ensemble_folder",
                         help="ensemble folder where models in the ensemble are stored")
@@ -81,8 +77,6 @@ def build_parser():
                         help="flag to specify if mixed ensemble should be used)",
                         action='store_false')
     parser.set_defaults(mixed=False)
-=======
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233
     
     return parser
 
@@ -156,7 +150,6 @@ def main():
         train_data, val_data, test_data = load_data(DATA_DIR, INPUT_FILE, 
                                                      MEDIA_LABEL_FILE, EMOTION_LABEL_FILE)
         # Preprocess the data
-<<<<<<< HEAD
         if os.path.isfile(os.path.join(TRAIN_STATS_DIR, "train_stats.npz")):
             print("Preprocess test data using saved statistics from train data...")
             train_stats_file = os.path.join(TRAIN_STATS_DIR, "train_stats.npz")
@@ -166,10 +159,7 @@ def main():
             train_dset, val_dset, test_dset = preprocess(train_data, val_data, test_data, 
                                                          augment=options.augment,
                                                          train_stats_dir=TRAIN_STATS_DIR)
-=======
-        train_dset, val_dset, test_dset = preprocess(train_data, val_data, test_data, 
-                                                     augment=options.augment)
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233
+
         # Specify the device:
         if options.device == "cpu":
             device = "/cpu:0"
@@ -180,7 +170,7 @@ def main():
         model_path = os.path.join("test_models", options.model_name)
         evaluate_test(model_path, options.model_type, test_dset, batch_size=64, 
                       confusion_mat=options.confusion_mat)
-<<<<<<< HEAD
+    
     elif options.mode == "ensemble":
         # Load the data and organize into three tuples (train, val/dev, test)
         # Each tuple consists of input arrays, media labels, and emotion labels
@@ -211,9 +201,7 @@ def main():
         evaluate_ensemble(options.ensemble_folder, test_dset, batch_size=64, 
                           confusion_mat=options.confusion_mat,
                           mixed_ensemble=options.mixed)    
-=======
-        
->>>>>>> 4cddb7f335fac80e360023b8fd93bb0c842cd233
+
 
 if __name__ == "__main__":
     main()
