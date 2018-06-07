@@ -105,6 +105,7 @@ def evaluate_ensemble(ensemble_folder, test_dset, batch_size=64, confusion_mat=F
         for model in models:
             print("Calculating predictions from model", model)
             y_media_pred, y_emotion_pred = models[0].predict(x_test, batch_size=batch_size)
+            print(ensemble_y_media_pred)
             ensemble_y_media_pred += y_media_pred
             ensemble_y_emotion_pred += y_emotion_pred
         
